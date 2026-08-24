@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { Quote } from "lucide-react";
 
 const testimonials = [
   {
@@ -63,35 +62,35 @@ export const Testimonials = () => {
             Success Stories
           </div>
           <h2 className="text-4xl sm:text-5xl md:text-6xl font-semibold tracking-tight">
-            Trusted by professionals
+            Loved by the community
           </h2>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="columns-1 sm:columns-2 lg:columns-3 gap-6">
           {testimonials.map((testimonial, index) => (
             <div
               key={index}
-              className="bg-white p-8 rounded-2xl border border-gray-200 hover:shadow-xl transition-all"
+              className="break-inside-avoid mb-6 bg-white rounded-2xl p-6 sm:p-8"
             >
-              <Quote className="w-10 h-10 text-purple-600 mb-6" />
-
-              <p className="text-lg text-gray-700 mb-6 leading-relaxed">
-                "{testimonial.content}"
-              </p>
-
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3 mb-5">
                 <img
                   src={testimonial.image}
                   alt={testimonial.name}
-                  className="w-14 h-14 rounded-full object-cover"
+                  className="w-9 h-9 rounded-full object-cover flex-shrink-0"
                 />
                 <div>
-                  <div className="font-semibold text-gray-900">
+                  <div className="font-medium text-gray-900 text-sm">
                     {testimonial.name}
                   </div>
-                  <div className="text-sm text-gray-600">{testimonial.role}</div>
+                  <div className="text-xs text-gray-500 uppercase tracking-wide">
+                    {testimonial.role}
+                  </div>
                 </div>
               </div>
+
+              <blockquote className="text-gray-600 leading-relaxed">
+                "{testimonial.content}"
+              </blockquote>
             </div>
           ))}
         </div>

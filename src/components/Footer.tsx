@@ -3,6 +3,10 @@ import { Link } from "react-router-dom";
 import { Mail, Phone, MapPin, Send, MessageCircle } from "lucide-react";
 import { Button } from "./ui/button";
 
+const ADDRESS = "Garki, Abuja 900103, Federal Capital Territory";
+const MAP_COORDS = "9.0333,7.4833";
+const MAP_BBOX = "7.4633,9.0133,7.5033,9.0533";
+
 const saveSubscriber = async (email: string) => {
   const payload = { email, timestamp: new Date().toISOString() };
   try {
@@ -43,7 +47,6 @@ export const Footer = () => {
 
   return (
     <footer className="relative bg-mint text-gray-600 overflow-hidden">
-      <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-500 to-emerald-500" />
       <div className="max-w-7xl mx-auto px-6 sm:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
           {/* Newsletter */}
@@ -147,9 +150,31 @@ export const Footer = () => {
               </li>
               <li className="flex items-start gap-3">
                 <MapPin className="w-4 h-4 text-purple-600 mt-0.5 flex-shrink-0" />
-                <span className="text-gray-600">[Location - TBD]</span>
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ADDRESS)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  {ADDRESS}
+                </a>
               </li>
             </ul>
+
+            <a
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ADDRESS)}`}
+              target="_blank"
+              rel="noreferrer"
+              className="block mt-4 rounded-xl overflow-hidden border border-gray-300 hover:border-gray-400 transition-colors"
+              aria-label="Open PEISCL location in Google Maps"
+            >
+              <iframe
+                src={`https://www.openstreetmap.org/export/embed.html?bbox=${MAP_BBOX}&layer=mapnik&marker=${MAP_COORDS}`}
+                className="w-full h-36 pointer-events-none"
+                loading="lazy"
+                title="PEISCL location map"
+              />
+            </a>
           </div>
 
           {/* Connect */}

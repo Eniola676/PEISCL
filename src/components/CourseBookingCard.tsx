@@ -22,14 +22,13 @@ export const CourseBookingCard = ({ course, onRegister }: CourseBookingCardProps
 
       {/* Body */}
       <div className="p-6 sm:p-7">
-        <div className="flex flex-wrap items-start gap-x-3 gap-y-2 mb-3">
-          <h3 className="text-2xl font-bold text-white leading-tight flex-1 min-w-[10rem]">
-            {course.title}
-          </h3>
-          <span className="flex-shrink-0 rounded-full border border-white/20 bg-white/5 px-3 py-1 text-xs font-semibold text-white whitespace-nowrap">
-            {course.levels.join(" – ")}
-          </span>
-        </div>
+        <span className="inline-block rounded-full border border-white/20 bg-white/5 px-3 py-1 text-xs font-semibold text-white whitespace-nowrap mb-3">
+          {course.levels.join(" – ")}
+        </span>
+
+        <h3 className="text-2xl font-bold text-white leading-tight mb-3">
+          {course.title}
+        </h3>
 
         <p className="text-gray-400 mb-4">
           {course.duration} • {course.track}

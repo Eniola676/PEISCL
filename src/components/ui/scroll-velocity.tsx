@@ -27,7 +27,7 @@ const ScrollVelocity = React.forwardRef<HTMLDivElement, ScrollVelocityProps>(
     const directionFactor = React.useRef<number>(1)
     const scrollThreshold = React.useRef<number>(5)
 
-    useAnimationFrame((t, delta) => {
+    useAnimationFrame((_t, delta) => {
       if (movable) {
         move(delta)
       } else {

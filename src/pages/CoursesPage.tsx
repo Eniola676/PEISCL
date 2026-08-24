@@ -134,7 +134,7 @@ function FacetFilter<T extends string>({
                 />
                 <Label
                   htmlFor={`${idPrefix}-${i}`}
-                  className="flex grow justify-between gap-2 font-normal cursor-pointer"
+                  className="flex grow justify-between gap-2 py-1.5 font-normal cursor-pointer"
                 >
                   {option}
                   <span className="ms-2 text-xs text-muted-foreground">{counts[option] ?? 0}</span>
