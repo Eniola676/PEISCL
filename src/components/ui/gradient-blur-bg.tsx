@@ -8,7 +8,7 @@ interface GradientBlurBgProps {
 
 export const GradientBlurBg = ({ children, className }: GradientBlurBgProps) => {
   return (
-    <div className={cn("min-h-screen w-full bg-white relative", className)}>
+    <div className={cn("w-full bg-mint relative", className)}>
       {/* Purple + Green Gradient Grid Background */}
       <div
         className="absolute inset-0 z-0"

@@ -15,11 +15,11 @@ export const accentStyles: Record<
   { text: string; textHover: string; border: string; dot: string; bgSoft: string }
 > = {
   purple: {
-    text: "text-indigo-600",
-    textHover: "hover:text-indigo-700",
-    border: "border-l-indigo-600",
-    dot: "bg-indigo-600",
-    bgSoft: "bg-indigo-50",
+    text: "text-purple-600",
+    textHover: "hover:text-purple-700",
+    border: "border-l-purple-600",
+    dot: "bg-purple-600",
+    bgSoft: "bg-purple-50",
   },
   green: {
     text: "text-emerald-600",

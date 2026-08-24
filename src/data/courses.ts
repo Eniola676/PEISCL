@@ -3,6 +3,8 @@ export interface CourseModule {
   topics: string[];
 }
 
+export type Level = "Beginner" | "Intermediate" | "Advanced";
+
 export interface Course {
   id: number;
   slug: string;
@@ -10,6 +12,7 @@ export interface Course {
   track: string;
   duration: string;
   level: string;
+  levels: Level[];
   overview: string;
   objectives?: string[];
   prerequisites?: string[];
@@ -27,7 +30,16 @@ export const tracks = [
   "Systems & Startup",
 ];
 
-export const coursesData: Course[] = [
+export const levels: Level[] = ["Beginner", "Intermediate", "Advanced"];
+
+const deriveLevels = (level: string): Level[] => {
+  const found = levels.filter((l) => level.toLowerCase().includes(l.toLowerCase()));
+  return found.length ? found : ["Beginner"];
+};
+
+type RawCourse = Omit<Course, "levels">;
+
+const courseList: RawCourse[] = [
   {
     id: 1,
     slug: "microsoft-powerpoint",
@@ -822,6 +834,11 @@ export const coursesData: Course[] = [
     ],
   },
 ];
+
+export const coursesData: Course[] = courseList.map((course) => ({
+  ...course,
+  levels: deriveLevels(course.level),
+}));
 
 export const getCourseBySlug = (slug: string) =>
   coursesData.find((course) => course.slug === slug);

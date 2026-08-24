@@ -7,6 +7,7 @@ import { ConfirmationModal } from "./components/ConfirmationModal";
 import { HomePage } from "./pages/HomePage";
 import { CoursesPage } from "./pages/CoursesPage";
 import { CourseDetailPage } from "./pages/CourseDetailPage";
+import { CourseFinderPage } from "./pages/CourseFinderPage";
 
 function App() {
   const [isRegistrationOpen, setIsRegistrationOpen] = useState(false);
@@ -40,6 +41,7 @@ function App() {
             path="/courses/:slug"
             element={<CourseDetailPage onRegisterClick={handleRegisterClick} />}
           />
+          <Route path="/find-my-course" element={<CourseFinderPage />} />
         </Routes>
 
         <Footer />

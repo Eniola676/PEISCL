@@ -1,5 +1,6 @@
 import { useState, FormEvent, useEffect } from "react";
 import { coursesData, tracks } from "../data/courses";
+import { Button } from "./ui/button";
 
 interface RegistrationModalProps {
   isOpen: boolean;
@@ -113,12 +114,15 @@ export const RegistrationModal = ({
       />
 
       <div className="relative bg-white rounded-3xl p-8 sm:p-12 max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl animate-slide-up">
-        <button
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={onClose}
-          className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-3xl text-gray-500 hover:text-gray-900"
+          className="absolute top-6 right-6 text-3xl text-gray-500 hover:text-gray-900"
+          aria-label="Close"
         >
           ×
-        </button>
+        </Button>
 
         <h2 className="text-4xl font-semibold mb-3 tracking-tight">
           Register your interest
@@ -142,7 +146,7 @@ export const RegistrationModal = ({
               onChange={(e) => setName(e.target.value)}
               required
               placeholder="Your name"
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-base focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all"
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-base focus:outline-none focus:border-purple-600 focus:ring-4 focus:ring-purple-100 transition-all"
             />
           </div>
 
@@ -161,7 +165,7 @@ export const RegistrationModal = ({
               required
               placeholder="+234 XXX XXX XXXX"
               pattern="[\+]?[0-9]{10,15}"
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-base focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all"
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-base focus:outline-none focus:border-purple-600 focus:ring-4 focus:ring-purple-100 transition-all"
             />
             <small className="text-sm text-gray-500 mt-2 block">
               Include country code (e.g., +234)
@@ -180,7 +184,7 @@ export const RegistrationModal = ({
               value={program}
               onChange={(e) => setProgram(e.target.value)}
               required
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-base focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all"
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-base focus:outline-none focus:border-purple-600 focus:ring-4 focus:ring-purple-100 transition-all"
             >
               <option value="">Select a course</option>
               {allCourses.map((track) => (
@@ -195,13 +199,14 @@ export const RegistrationModal = ({
             </select>
           </div>
 
-          <button
+          <Button
             type="submit"
+            size="lg"
             disabled={isSubmitting}
-            className="w-full bg-indigo-600 text-white text-lg font-medium px-8 py-4 rounded-full hover:bg-indigo-700 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full hover:-translate-y-1 hover:shadow-2xl"
           >
             {isSubmitting ? "Submitting..." : "Submit"}
-          </button>
+          </Button>
         </form>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
+import { Button } from "./ui/button";
 
 interface NavbarProps {
   onRegisterClick: () => void;
@@ -13,6 +14,7 @@ export const Navbar = ({ onRegisterClick }: NavbarProps) => {
   const links = [
     { name: "Home", path: "/" },
     { name: "Courses", path: "/courses" },
+    { name: "Find My Course", path: "/find-my-course" },
     { name: "About", path: "/#about" },
   ];
 
@@ -30,7 +32,7 @@ export const Navbar = ({ onRegisterClick }: NavbarProps) => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-200">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-mint/80 backdrop-blur-lg border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-6 sm:px-8">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
@@ -54,7 +56,7 @@ export const Navbar = ({ onRegisterClick }: NavbarProps) => {
                 onClick={() => handleLinkClick(link.path)}
                 className={`text-base font-medium transition-colors ${
                   isActive(link.path)
-                    ? "text-indigo-600"
+                    ? "text-purple-600"
                     : "text-gray-600 hover:text-gray-900"
                 }`}
               >
@@ -62,21 +64,21 @@ export const Navbar = ({ onRegisterClick }: NavbarProps) => {
               </Link>
             ))}
 
-            <button
-              onClick={onRegisterClick}
-              className="bg-indigo-600 text-white px-6 py-2.5 rounded-full font-medium hover:bg-indigo-700 transition-all hover:-translate-y-0.5"
-            >
+            <Button onClick={onRegisterClick} className="hover:-translate-y-0.5">
               Register Now
-            </button>
+            </Button>
           </div>
 
           {/* Mobile Menu Button */}
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-2 text-gray-600 hover:text-gray-900 flex-shrink-0"
+            className="md:hidden text-gray-600 hover:text-gray-900 flex-shrink-0"
+            aria-label={isMenuOpen ? "Close menu" : "Open menu"}
           >
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          </Button>
         </div>
 
         {/* Mobile Navigation */}
@@ -90,7 +92,7 @@ export const Navbar = ({ onRegisterClick }: NavbarProps) => {
                   onClick={() => handleLinkClick(link.path)}
                   className={`text-base font-medium transition-colors py-2.5 ${
                     isActive(link.path)
-                      ? "text-indigo-600"
+                      ? "text-purple-600"
                       : "text-gray-600 hover:text-gray-900"
                   }`}
                 >
@@ -98,15 +100,15 @@ export const Navbar = ({ onRegisterClick }: NavbarProps) => {
                 </Link>
               ))}
 
-              <button
+              <Button
                 onClick={() => {
                   onRegisterClick();
                   setIsMenuOpen(false);
                 }}
-                className="mt-3 bg-indigo-600 text-white px-6 py-3 rounded-full font-medium hover:bg-indigo-700 transition-all text-center"
+                className="mt-3 w-full"
               >
                 Register Now
-              </button>
+              </Button>
             </div>
           </div>
         )}

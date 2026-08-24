@@ -53,13 +53,13 @@ export const Testimonials = () => {
   return (
     <section
       ref={sectionRef}
-      className={`py-24 md:py-32 bg-gray-50 transition-all duration-700 ${
+      className={`py-24 md:py-32 bg-mint transition-all duration-700 ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
       }`}
     >
       <div className="max-w-7xl mx-auto px-6 sm:px-8">
         <div className="text-center mb-16">
-          <div className="text-sm font-medium text-indigo-600 uppercase tracking-wider mb-4">
+          <div className="text-sm font-medium text-purple-600 uppercase tracking-wider mb-4">
             Success Stories
           </div>
           <h2 className="text-4xl sm:text-5xl md:text-6xl font-semibold tracking-tight">
@@ -73,7 +73,7 @@ export const Testimonials = () => {
               key={index}
               className="bg-white p-8 rounded-2xl border border-gray-200 hover:shadow-xl transition-all"
             >
-              <Quote className="w-10 h-10 text-indigo-600 mb-6" />
+              <Quote className="w-10 h-10 text-purple-600 mb-6" />
 
               <p className="text-lg text-gray-700 mb-6 leading-relaxed">
                 "{testimonial.content}"

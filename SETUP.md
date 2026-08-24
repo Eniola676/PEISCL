@@ -192,7 +192,7 @@ Choose **ONE** option:
 
 1. Sign up: https://www.twilio.com/
 2. Get WhatsApp Sandbox number
-3. Edit `server.js` lines 17-19 with your credentials
+3. Edit `server.cjs` lines 17-19 with your credentials
 4. Uncomment Twilio code (lines 71-87)
 5. Install: `npm install twilio`
 6. Restart server
@@ -202,7 +202,7 @@ Choose **ONE** option:
 1. Setup: https://developers.facebook.com/apps
 2. Create Business App → WhatsApp → Get Started
 3. Get Access Token & Phone Number ID
-4. Edit `server.js` lines 22-23
+4. Edit `server.cjs` lines 22-23
 5. Uncomment Cloud API code (lines 91-120)
 6. Install: `npm install node-fetch@2`
 7. Restart server

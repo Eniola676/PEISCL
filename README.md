@@ -60,7 +60,7 @@ Panaroma/
 │   ├── main.tsx                        # Entry point
 │   └── index.css                       # Global styles + Tailwind
 │
-├── server.js                           # Backend API (optional)
+├── server.cjs                           # Backend API (optional)
 ├── admin.html                          # Admin dashboard (static)
 ├── vite.config.ts                      # Vite configuration
 ├── tailwind.config.js                  # Tailwind configuration
@@ -107,25 +107,25 @@ To add more shadcn components, simply copy them into `src/components/ui/`.
 ### Option A: Twilio WhatsApp API
 
 1. **Get credentials**: https://www.twilio.com/console
-2. **Edit `server.js`** (lines 17-19):
+2. **Edit `server.cjs`** (lines 17-19):
    ```javascript
    TWILIO_ACCOUNT_SID: 'ACxxxxxxxxxxxx',
    TWILIO_AUTH_TOKEN: 'your_auth_token',
    TWILIO_WHATSAPP_NUMBER: 'whatsapp:+14155238886'
    ```
-3. **Uncomment** Twilio section in `server.js` (lines 71-87)
+3. **Uncomment** Twilio section in `server.cjs` (lines 71-87)
 4. **Install**: `npm install twilio`
 5. **Run backend**: `npm run server` (separate terminal)
 
 ### Option B: WhatsApp Cloud API (Meta)
 
 1. **Setup**: https://developers.facebook.com/docs/whatsapp/cloud-api
-2. **Edit `server.js`** (lines 22-23):
+2. **Edit `server.cjs`** (lines 22-23):
    ```javascript
    WHATSAPP_ACCESS_TOKEN: 'your_access_token',
    WHATSAPP_PHONE_NUMBER_ID: 'your_phone_number_id'
    ```
-3. **Uncomment** Cloud API section in `server.js` (lines 91-120)
+3. **Uncomment** Cloud API section in `server.cjs` (lines 91-120)
 4. **Install**: `npm install node-fetch@2`
 5. **Run backend**: `npm run server`
 

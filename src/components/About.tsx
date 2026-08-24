@@ -66,9 +66,9 @@ export const About = () => {
   }, []);
 
   const stats = [
-    { icon: Users, label: "Students Trained", value: "[500+]", accent: "text-indigo-600" },
+    { icon: Users, label: "Students Trained", value: "[500+]", accent: "text-purple-600" },
     { icon: BookOpen, label: "Courses Offered", value: String(coursesData.length), accent: "text-emerald-600" },
-    { icon: Award, label: "Industry Partners", value: "[10+]", accent: "text-indigo-600" },
+    { icon: Award, label: "Industry Partners", value: "[10+]", accent: "text-purple-600" },
     { icon: TrendingUp, label: "Success Rate", value: "[95%]", accent: "text-emerald-600" },
   ];
 
@@ -76,7 +76,7 @@ export const About = () => {
     <section
       id="about"
       ref={sectionRef}
-      className={`py-24 md:py-32 bg-gray-50 transition-all duration-700 ${
+      className={`py-24 md:py-32 bg-mint transition-all duration-700 ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
       }`}
     >
@@ -84,7 +84,7 @@ export const About = () => {
         <div className="grid md:grid-cols-2 gap-16 items-center mb-20">
           {/* Left: Content */}
           <div>
-            <div className="text-sm font-medium text-indigo-600 uppercase tracking-wider mb-4">
+            <div className="text-sm font-medium text-purple-600 uppercase tracking-wider mb-4">
               About PEISCL
             </div>
             <h2 className="text-4xl sm:text-5xl md:text-6xl font-semibold tracking-tight mb-6">

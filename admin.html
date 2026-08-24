@@ -218,6 +218,54 @@
             margin-bottom: 0.5rem;
         }
 
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #d2d2d7;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 0.75rem 1.25rem;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #6e6e73;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            border-radius: 0;
+        }
+
+        .tab-btn.active {
+            color: #5856d6;
+            border-bottom-color: #5856d6;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        .tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+        }
+
+        .tag {
+            background: #f5f5f7;
+            color: #1d1d1f;
+            padding: 0.15rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+        }
+
         @media (max-width: 768px) {
             body {
                 padding: 1rem;
@@ -240,67 +288,119 @@
 <body>
     <div class="container">
         <header>
-            <h1>Course Registrations</h1>
+            <h1>Admin Dashboard</h1>
             <p style="color: #6e6e73; margin-top: 0.5rem;">PEISCL Admin</p>
         </header>
 
-        <div class="stats" id="stats">
-            <div class="stat-card">
-                <div class="stat-label">Total Registrations</div>
-                <div class="stat-value" id="totalCount">—</div>
+        <div class="tabs">
+            <button class="tab-btn active" id="tabBtnRegistrations" onclick="switchTab('registrations')">Course Registrations</button>
+            <button class="tab-btn" id="tabBtnGuidance" onclick="switchTab('guidance')">Course Guidance Requests</button>
+        </div>
+
+        <div class="tab-panel active" id="panelRegistrations">
+            <div class="stats" id="stats">
+                <div class="stat-card">
+                    <div class="stat-label">Total Registrations</div>
+                    <div class="stat-value" id="totalCount">—</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">This Week</div>
+                    <div class="stat-value" id="weekCount">—</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Today</div>
+                    <div class="stat-value" id="todayCount">—</div>
+                </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-label">This Week</div>
-                <div class="stat-value" id="weekCount">—</div>
+
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="filterTrack">Track</label>
+                    <select id="filterTrack" onchange="filterRegistrations()">
+                        <option value="">All Tracks</option>
+                        <option value="Data & AI">Data & AI</option>
+                        <option value="Web & Office Skills">Web & Office Skills</option>
+                        <option value="Digital & Security">Digital & Security</option>
+                        <option value="Systems & Startup">Systems & Startup</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterStatus">Status</label>
+                    <select id="filterStatus" onchange="filterRegistrations()">
+                        <option value="">All Statuses</option>
+                        <option value="pending">Pending</option>
+                        <option value="contacted">Contacted</option>
+                        <option value="enrolled">Enrolled</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="searchName">Search by Name</label>
+                    <input type="text" id="searchName" placeholder="Type to search..." oninput="filterRegistrations()">
+                </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-label">Today</div>
-                <div class="stat-value" id="todayCount">—</div>
+
+            <div class="actions">
+                <button class="btn-primary" onclick="loadRegistrations()">Refresh Data</button>
+                <button class="btn-secondary" onclick="exportToCSV()">Export CSV</button>
+            </div>
+
+            <div id="tableContainer">
+                <div class="loading">Loading registrations...</div>
             </div>
         </div>
 
-        <div class="filters">
-            <div class="filter-group">
-                <label for="filterTrack">Track</label>
-                <select id="filterTrack" onchange="filterRegistrations()">
-                    <option value="">All Tracks</option>
-                    <option value="Data & AI">Data & AI</option>
-                    <option value="Web & Office Skills">Web & Office Skills</option>
-                    <option value="Digital & Security">Digital & Security</option>
-                    <option value="Systems & Startup">Systems & Startup</option>
-                </select>
+        <div class="tab-panel" id="panelGuidance">
+            <div class="stats" id="guidanceStats">
+                <div class="stat-card">
+                    <div class="stat-label">Total Requests</div>
+                    <div class="stat-value" id="guidanceTotalCount">—</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">This Week</div>
+                    <div class="stat-value" id="guidanceWeekCount">—</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Today</div>
+                    <div class="stat-value" id="guidanceTodayCount">—</div>
+                </div>
             </div>
-            <div class="filter-group">
-                <label for="filterStatus">Status</label>
-                <select id="filterStatus" onchange="filterRegistrations()">
-                    <option value="">All Statuses</option>
-                    <option value="pending">Pending</option>
-                    <option value="contacted">Contacted</option>
-                    <option value="enrolled">Enrolled</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label for="searchName">Search by Name</label>
-                <input type="text" id="searchName" placeholder="Type to search..." oninput="filterRegistrations()">
-            </div>
-        </div>
 
-        <div class="actions">
-            <button class="btn-primary" onclick="loadRegistrations()">Refresh Data</button>
-            <button class="btn-secondary" onclick="exportToCSV()">Export CSV</button>
-        </div>
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="searchGuidanceName">Search by Name</label>
+                    <input type="text" id="searchGuidanceName" placeholder="Type to search..." oninput="filterGuidance()">
+                </div>
+            </div>
 
-        <div id="tableContainer">
-            <div class="loading">Loading registrations...</div>
+            <div class="actions">
+                <button class="btn-primary" onclick="loadGuidanceRequests()">Refresh Data</button>
+                <button class="btn-secondary" onclick="exportGuidanceToCSV()">Export CSV</button>
+            </div>
+
+            <div id="guidanceTableContainer">
+                <div class="loading">Loading guidance requests...</div>
+            </div>
         </div>
     </div>
 
     <script>
         let allRegistrations = [];
         let filteredRegistrations = [];
+        let allGuidanceRequests = [];
+        let filteredGuidanceRequests = [];
 
-        // Load registrations on page load
-        document.addEventListener('DOMContentLoaded', loadRegistrations);
+        // Load data on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadRegistrations();
+            loadGuidanceRequests();
+        });
+
+        function switchTab(tab) {
+            document.getElementById('tabBtnRegistrations').classList.toggle('active', tab === 'registrations');
+            document.getElementById('tabBtnGuidance').classList.toggle('active', tab === 'guidance');
+            document.getElementById('panelRegistrations').classList.toggle('active', tab === 'registrations');
+            document.getElementById('panelGuidance').classList.toggle('active', tab === 'guidance');
+        }
 
         async function loadRegistrations() {
             try {
@@ -423,6 +523,134 @@
             const a = document.createElement('a');
             a.href = url;
             a.download = `registrations_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+        }
+
+        // ===================================
+        // COURSE GUIDANCE REQUESTS
+        // ===================================
+
+        async function loadGuidanceRequests() {
+            try {
+                const response = await fetch('/api/course-guidance');
+                const data = await response.json();
+
+                if (data.success) {
+                    allGuidanceRequests = data.requests;
+                } else {
+                    throw new Error('Failed to load');
+                }
+            } catch (error) {
+                console.log('Backend unavailable, loading guidance requests from localStorage');
+                allGuidanceRequests = JSON.parse(localStorage.getItem('guidanceRequests') || '[]');
+            }
+
+            filteredGuidanceRequests = allGuidanceRequests;
+            updateGuidanceStats();
+            renderGuidanceTable();
+        }
+
+        function updateGuidanceStats() {
+            const total = allGuidanceRequests.length;
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+            const todayCount = allGuidanceRequests.filter(r => new Date(r.timestamp) >= today).length;
+            const weekCount = allGuidanceRequests.filter(r => new Date(r.timestamp) >= weekAgo).length;
+
+            document.getElementById('guidanceTotalCount').textContent = total;
+            document.getElementById('guidanceTodayCount').textContent = todayCount;
+            document.getElementById('guidanceWeekCount').textContent = weekCount;
+        }
+
+        function filterGuidance() {
+            const searchTerm = document.getElementById('searchGuidanceName').value.toLowerCase();
+            filteredGuidanceRequests = allGuidanceRequests.filter(req =>
+                !searchTerm || (req.name || '').toLowerCase().includes(searchTerm)
+            );
+            renderGuidanceTable();
+        }
+
+        function renderTags(items) {
+            if (!items || !items.length) return '—';
+            return `<div class="tag-list">${items.map(i => `<span class="tag">${i}</span>`).join('')}</div>`;
+        }
+
+        function renderGuidanceTable() {
+            const container = document.getElementById('guidanceTableContainer');
+
+            if (filteredGuidanceRequests.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h2>No guidance requests yet</h2>
+                        <p>Requests from the "Not sure what to learn?" form will appear here.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const rows = filteredGuidanceRequests
+                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+                .map(req => `
+                    <tr>
+                        <td><strong>${req.name}</strong></td>
+                        <td><a href="https://wa.me/${(req.whatsapp || '').replace(/\D/g, '')}" class="whatsapp-link" target="_blank">${req.whatsapp}</a></td>
+                        <td>${req.educationLevel || '—'}${req.fieldOfStudy ? ` (${req.fieldOfStudy})` : ''}</td>
+                        <td>${req.computerLiteracy || '—'}</td>
+                        <td>${renderTags(req.skills)}</td>
+                        <td>${renderTags(req.interests)}</td>
+                        <td>${req.goal || '—'}</td>
+                        <td>${req.notes || '—'}</td>
+                        <td>${new Date(req.timestamp).toLocaleDateString()} ${new Date(req.timestamp).toLocaleTimeString()}</td>
+                    </tr>
+                `).join('');
+
+            container.innerHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>WhatsApp</th>
+                            <th>Education</th>
+                            <th>Computer Literacy</th>
+                            <th>Skills</th>
+                            <th>Interests</th>
+                            <th>Goal</th>
+                            <th>Notes</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rows}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function exportGuidanceToCSV() {
+            const headers = ['Name', 'WhatsApp', 'Education Level', 'Field of Study', 'Computer Literacy', 'Skills', 'Interests', 'Goal', 'Notes', 'Timestamp'];
+            const rows = filteredGuidanceRequests.map(req => [
+                req.name,
+                req.whatsapp,
+                req.educationLevel || '',
+                req.fieldOfStudy || '',
+                req.computerLiteracy || '',
+                (req.skills || []).join('; '),
+                (req.interests || []).join('; '),
+                req.goal || '',
+                req.notes || '',
+                req.timestamp
+            ]);
+
+            let csv = headers.join(',') + '\n';
+            csv += rows.map(row => row.map(field => `"${String(field).replace(/"/g, '""')}"`).join(',')).join('\n');
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `guidance_requests_${new Date().toISOString().split('T')[0]}.csv`;
             a.click();
         }
     </script>

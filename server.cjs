@@ -34,7 +34,9 @@ const CONFIG = {
     WHATSAPP_PHONE_NUMBER_ID: process.env.WHATSAPP_PHONE_NUMBER_ID || 'your_phone_number_id',
 
     // Data storage path
-    DATA_FILE: path.join(__dirname, 'registrations.json')
+    DATA_FILE: path.join(__dirname, 'registrations.json'),
+    GUIDANCE_FILE: path.join(__dirname, 'guidance-requests.json'),
+    NEWSLETTER_FILE: path.join(__dirname, 'newsletter-subscribers.json')
 };
 
 // ===================================
@@ -196,6 +198,138 @@ app.get('/api/registrations', (req, res) => {
         }
     } catch (error) {
         console.error('Error reading registrations:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error'
+        });
+    }
+});
+
+// ===================================
+// SAVE COURSE GUIDANCE REQUEST ("Not sure what to learn" form)
+// ===================================
+
+app.post('/api/course-guidance', async (req, res) => {
+    try {
+        const { name, whatsapp, educationLevel, computerLiteracy, interests } = req.body;
+
+        // Validate required fields
+        if (!name || !whatsapp || !educationLevel || !computerLiteracy || !interests || !interests.length) {
+            return res.status(400).json({
+                success: false,
+                error: 'Missing required fields'
+            });
+        }
+
+        // Load existing guidance requests
+        let requests = [];
+        if (fs.existsSync(CONFIG.GUIDANCE_FILE)) {
+            const data = fs.readFileSync(CONFIG.GUIDANCE_FILE, 'utf8');
+            requests = JSON.parse(data);
+        }
+
+        // Add new guidance request
+        const request = {
+            id: Date.now(),
+            ...req.body,
+            timestamp: req.body.timestamp || new Date().toISOString(),
+            status: 'pending'
+        };
+
+        requests.push(request);
+
+        // Save to file
+        fs.writeFileSync(
+            CONFIG.GUIDANCE_FILE,
+            JSON.stringify(requests, null, 2)
+        );
+
+        console.log('New course guidance request saved:', request);
+
+        res.json({
+            success: true,
+            request
+        });
+
+    } catch (error) {
+        console.error('Course guidance error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error'
+        });
+    }
+});
+
+// ===================================
+// VIEW COURSE GUIDANCE REQUESTS (ADMIN)
+// ===================================
+
+app.get('/api/course-guidance', (req, res) => {
+    try {
+        if (fs.existsSync(CONFIG.GUIDANCE_FILE)) {
+            const data = fs.readFileSync(CONFIG.GUIDANCE_FILE, 'utf8');
+            const requests = JSON.parse(data);
+            res.json({
+                success: true,
+                count: requests.length,
+                requests
+            });
+        } else {
+            res.json({
+                success: true,
+                count: 0,
+                requests: []
+            });
+        }
+    } catch (error) {
+        console.error('Error reading guidance requests:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error'
+        });
+    }
+});
+
+// ===================================
+// NEWSLETTER SIGNUP (footer form)
+// ===================================
+
+app.post('/api/newsletter', async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                error: 'Missing email'
+            });
+        }
+
+        let subscribers = [];
+        if (fs.existsSync(CONFIG.NEWSLETTER_FILE)) {
+            const data = fs.readFileSync(CONFIG.NEWSLETTER_FILE, 'utf8');
+            subscribers = JSON.parse(data);
+        }
+
+        if (!subscribers.some(s => s.email.toLowerCase() === email.toLowerCase())) {
+            subscribers.push({
+                id: Date.now(),
+                email,
+                timestamp: req.body.timestamp || new Date().toISOString()
+            });
+
+            fs.writeFileSync(
+                CONFIG.NEWSLETTER_FILE,
+                JSON.stringify(subscribers, null, 2)
+            );
+        }
+
+        console.log('Newsletter signup:', email);
+
+        res.json({ success: true });
+
+    } catch (error) {
+        console.error('Newsletter error:', error);
         res.status(500).json({
             success: false,
             error: 'Internal server error'

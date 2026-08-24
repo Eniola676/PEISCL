@@ -2,6 +2,9 @@ import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, Clock, Users, Award, CheckCircle2 } from "lucide-react";
 import { getCourseBySlug } from "../data/courses";
 import { accentStyles, getTrackAccent } from "../lib/trackAccent";
+import { levelStyles } from "../lib/levelStyle";
+import { CourseBookingCard } from "../components/CourseBookingCard";
+import { Button } from "../components/ui/button";
 
 interface CourseDetailPageProps {
   onRegisterClick: (courseName: string) => void;
@@ -15,7 +18,7 @@ export const CourseDetailPage = ({ onRegisterClick }: CourseDetailPageProps) => 
 
   if (!course) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-32 pb-24">
+      <div className="min-h-screen bg-mint pt-32 pb-24">
         <div className="max-w-3xl mx-auto px-6 sm:px-8 text-center">
           <h1 className="text-4xl font-semibold tracking-tight mb-4">
             Course not found
@@ -25,7 +28,7 @@ export const CourseDetailPage = ({ onRegisterClick }: CourseDetailPageProps) => 
           </p>
           <Link
             to="/courses"
-            className="inline-flex items-center gap-2 text-indigo-600 font-medium hover:text-indigo-700"
+            className="inline-flex items-center gap-2 text-purple-600 font-medium hover:text-purple-700"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to all courses
@@ -36,20 +39,39 @@ export const CourseDetailPage = ({ onRegisterClick }: CourseDetailPageProps) => 
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-32 pb-24">
-      <div className="max-w-4xl mx-auto px-6 sm:px-8">
+    <div className="min-h-screen bg-mint pt-32 pb-24">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8">
         <Link
           to="/courses"
-          className="inline-flex items-center gap-2 text-indigo-600 font-medium hover:text-indigo-700 mb-8"
+          className="inline-flex items-center gap-2 text-purple-600 font-medium hover:text-purple-700 mb-8"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to all courses
         </Link>
 
+        <div className="grid lg:grid-cols-[1fr_400px] gap-12 items-start">
+        <div className="min-w-0 max-w-3xl">
+        {/* Mobile/tablet booking card - inline, non-sticky */}
+        <div className="lg:hidden mb-10">
+          <CourseBookingCard course={course} onRegister={() => onRegisterClick(course.title)} />
+        </div>
+
         {/* Header */}
         <div className="mb-12">
-          <div className={`text-sm font-medium mb-3 ${accent.text}`}>
-            {course.track}
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-3">
+            <div className={`text-sm font-medium ${accent.text}`}>
+              {course.track}
+            </div>
+            <div className="flex gap-1.5">
+              {course.levels.map((lvl) => (
+                <span
+                  key={lvl}
+                  className={`text-xs font-medium px-2 py-0.5 rounded-full ${levelStyles[lvl].badgeBg} ${levelStyles[lvl].badgeText}`}
+                >
+                  {lvl}
+                </span>
+              ))}
+            </div>
           </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight mb-6">
             {course.title}
@@ -142,12 +164,20 @@ export const CourseDetailPage = ({ onRegisterClick }: CourseDetailPageProps) => 
         </div>
 
         {/* Register CTA */}
-        <button
+        <Button
+          size="lg"
           onClick={() => onRegisterClick(course.title)}
-          className="w-full bg-indigo-600 text-white py-4 rounded-full font-medium hover:bg-indigo-700 transition-all hover:-translate-y-0.5 hover:shadow-lg"
+          className="w-full hover:-translate-y-0.5 hover:shadow-lg"
         >
           Register for this course
-        </button>
+        </Button>
+        </div>
+
+        {/* Desktop booking card - sticky sidebar */}
+        <div className="hidden lg:block sticky top-32 min-w-0">
+          <CourseBookingCard course={course} onRegister={() => onRegisterClick(course.title)} />
+        </div>
+        </div>
       </div>
     </div>
   );

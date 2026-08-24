@@ -11,6 +11,8 @@ pnpm-lock.yaml
 
 # Data files (add registrations.json if you want to track it)
 registrations.json
+guidance-requests.json
+newsletter-subscribers.json
 
 # Logs
 *.log

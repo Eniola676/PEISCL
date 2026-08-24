@@ -6,7 +6,12 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    /* Triadic palette: mint #f1f8f6 (163°), lilac #f6f1f8 (283°), sand #f8f6f1 (43°) */
+    --mint: 163 33% 96%;
+    --lilac: 283 33% 96%;
+    --sand: 43 33% 96%;
+
+    --background: 163 33% 96%;
     --foreground: 222.2 84% 4.9%;
 
     --card: 0 0% 100%;
@@ -15,24 +20,24 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 243 75% 59%;
+    --primary: 271 81% 56%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 210 40% 96.1%;
+    --secondary: 283 33% 96%;
     --secondary-foreground: 222.2 47.4% 11.2%;
 
-    --muted: 210 40% 96.1%;
+    --muted: 283 20% 95%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 210 40% 96.1%;
+    --accent: 283 33% 96%;
     --accent-foreground: 222.2 47.4% 11.2%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 243 75% 59%;
+    --border: 283 15% 89%;
+    --input: 283 15% 89%;
+    --ring: 271 81% 56%;
 
     --radius: 0.5rem;
   }
