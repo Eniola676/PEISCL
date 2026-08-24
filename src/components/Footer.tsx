@@ -211,7 +211,15 @@ export const Footer = () => {
             © {currentYear} PEISCL. All rights reserved.
           </p>
           <p className="text-gray-500 text-sm">
-            Built with ❤️ for tech education
+            Built by{" "}
+            <a
+              href="https://www.lumonstudio.xyz"
+              target="_blank"
+              rel="noreferrer"
+              className="hover:text-gray-900 transition-colors"
+            >
+              Lumon Studios
+            </a>
           </p>
         </div>
       </div>
