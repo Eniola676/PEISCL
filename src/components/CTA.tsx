@@ -15,9 +15,9 @@ interface CTAProps {
 }
 
 const levelImages: Record<Level, string> = {
-  Beginner: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=1200",
-  Intermediate: "https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=1200",
-  Advanced: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1200",
+  Beginner: "/portrait/portrait-1.jpeg",
+  Intermediate: "/portrait/portrait-2.jpeg",
+  Advanced: "/portrait/portrait-3.jpeg",
 };
 
 const steps = [

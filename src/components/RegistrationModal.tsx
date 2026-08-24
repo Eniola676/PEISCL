@@ -1,5 +1,7 @@
 import { useState, FormEvent, useEffect } from "react";
+import { Check, MapPin, Video } from "lucide-react";
 import { coursesData, tracks } from "../data/courses";
+import { locations, allLocationIds, LocationId } from "../data/locations";
 import { Button } from "./ui/button";
 
 interface RegistrationModalProps {
@@ -23,7 +25,11 @@ export const RegistrationModal = ({
   const [name, setName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [program, setProgram] = useState(selectedCourse || "");
+  const [location, setLocation] = useState<LocationId | "">("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const selectedCourseData = coursesData.find((c) => c.title === program);
+  const availableLocationIds = selectedCourseData ? selectedCourseData.locations : allLocationIds;
 
   useEffect(() => {
     if (selectedCourse) {
@@ -31,14 +37,24 @@ export const RegistrationModal = ({
     }
   }, [selectedCourse]);
 
+  useEffect(() => {
+    if (location && !availableLocationIds.includes(location)) {
+      setLocation("");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [program]);
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (!location) return;
     setIsSubmitting(true);
 
     const formData = {
       name,
       whatsapp,
       program,
+      location,
+      locationName: locations[location].name,
       timestamp: new Date().toISOString(),
     };
 
@@ -53,6 +69,7 @@ export const RegistrationModal = ({
       setName("");
       setWhatsapp("");
       setProgram("");
+      setLocation("");
 
       // Close modal and show success
       onClose();
@@ -199,10 +216,53 @@ export const RegistrationModal = ({
             </select>
           </div>
 
+          <div className="mb-8">
+            <label className="block text-sm font-medium text-gray-900 uppercase tracking-wide mb-2">
+              Preferred Location
+            </label>
+            <div className="space-y-2.5">
+              {availableLocationIds.map((id) => {
+                const loc = locations[id];
+                const selected = location === id;
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => setLocation(id)}
+                    className={`w-full flex items-start gap-3 text-left px-4 py-3 rounded-xl border transition-all ${
+                      selected
+                        ? "border-purple-600 bg-purple-50 ring-2 ring-purple-100"
+                        : "border-gray-300 bg-white hover:border-gray-400"
+                    }`}
+                  >
+                    <div
+                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-0.5 ${
+                        selected ? "border-purple-600 bg-purple-600" : "border-gray-300"
+                      }`}
+                    >
+                      {selected && <Check className="w-3 h-3 text-white" />}
+                    </div>
+                    <div className="flex items-start gap-2 min-w-0">
+                      {loc.type === "virtual" ? (
+                        <Video className="w-4 h-4 text-gray-500 flex-shrink-0 mt-0.5" />
+                      ) : (
+                        <MapPin className="w-4 h-4 text-gray-500 flex-shrink-0 mt-0.5" />
+                      )}
+                      <div className="min-w-0">
+                        <div className="font-medium text-gray-900">{loc.name}</div>
+                        <div className="text-sm text-gray-600">{loc.address}</div>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           <Button
             type="submit"
             size="lg"
-            disabled={isSubmitting}
+            disabled={isSubmitting || !location}
             className="w-full hover:-translate-y-1 hover:shadow-2xl"
           >
             {isSubmitting ? "Submitting..." : "Submit"}

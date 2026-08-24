@@ -1,6 +1,7 @@
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Clock, Users, Award, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Clock, Users, Award, CheckCircle2, MapPin } from "lucide-react";
 import { getCourseBySlug } from "../data/courses";
+import { formatLocationSummary } from "../data/locations";
 import { accentStyles, getTrackAccent } from "../lib/trackAccent";
 import { levelStyles } from "../lib/levelStyle";
 import { CourseBookingCard } from "../components/CourseBookingCard";
@@ -89,6 +90,10 @@ export const CourseDetailPage = ({ onRegisterClick }: CourseDetailPageProps) => 
             <div className="flex items-center gap-2">
               <Award className="w-4 h-4 flex-shrink-0" />
               <span>Certificate of completion</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <MapPin className="w-4 h-4 flex-shrink-0" />
+              <span>{formatLocationSummary(course.locations)}</span>
             </div>
           </div>
 

@@ -3,40 +3,18 @@ import { Award, Users, BookOpen, TrendingUp } from "lucide-react";
 import { ScrollVelocity } from "./ui/scroll-velocity";
 import { coursesData } from "../data/courses";
 
-const images = [
-  {
-    title: "Training Session 1",
-    thumbnail: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=640",
-  },
-  {
-    title: "Students Learning",
-    thumbnail: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=640",
-  },
-  {
-    title: "Classroom Environment",
-    thumbnail: "https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?q=80&w=640",
-  },
-  {
-    title: "Tech Workshop",
-    thumbnail: "https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=640",
-  },
-  {
-    title: "Collaborative Learning",
-    thumbnail: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=640",
-  },
-  {
-    title: "Training Session 2",
-    thumbnail: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=640",
-  },
-  {
-    title: "Students Learning 2",
-    thumbnail: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=640",
-  },
-  {
-    title: "Classroom Environment 2",
-    thumbnail: "https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?q=80&w=640",
-  },
+const marqueePhotos = [
+  { title: "PEISCL students with laptops", src: "/img/marquee-1.jpeg" },
+  { title: "Instructor delivering online training", src: "/img/marquee-2.jpeg" },
+  { title: "Instructor leading a training session", src: "/img/marquee-3.jpeg" },
 ];
+
+const images = [...marqueePhotos, ...marqueePhotos, ...marqueePhotos].map(
+  ({ title, src }, index) => ({
+    title: `${title} ${Math.floor(index / marqueePhotos.length) + 1}`,
+    thumbnail: src,
+  })
+);
 
 const velocity = [3, -3];
 

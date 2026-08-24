@@ -1,3 +1,5 @@
+import { LocationId, allLocationIds } from "./locations";
+
 export interface CourseModule {
   title: string;
   topics: string[];
@@ -13,6 +15,7 @@ export interface Course {
   duration: string;
   level: string;
   levels: Level[];
+  locations: LocationId[];
   overview: string;
   objectives?: string[];
   prerequisites?: string[];
@@ -22,6 +25,10 @@ export interface Course {
   outcomes: string[];
   assessment?: string[];
 }
+
+// Slugs of courses offered only at the Jabi campus (e.g. executive/leadership-oriented
+// courses). Update this list once confirmed — everything else defaults to all 3 locations.
+const JABI_ONLY_COURSE_SLUGS: string[] = [];
 
 export const tracks = [
   "Data & AI",
@@ -37,7 +44,7 @@ const deriveLevels = (level: string): Level[] => {
   return found.length ? found : ["Beginner"];
 };
 
-type RawCourse = Omit<Course, "levels">;
+type RawCourse = Omit<Course, "levels" | "locations">;
 
 const courseList: RawCourse[] = [
   {
@@ -838,6 +845,7 @@ const courseList: RawCourse[] = [
 export const coursesData: Course[] = courseList.map((course) => ({
   ...course,
   levels: deriveLevels(course.level),
+  locations: JABI_ONLY_COURSE_SLUGS.includes(course.slug) ? (["jabi"] as LocationId[]) : allLocationIds,
 }));
 
 export const getCourseBySlug = (slug: string) =>

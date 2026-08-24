@@ -9,8 +9,10 @@ import {
   XCircle,
   Filter,
   Compass,
+  MapPin,
 } from "lucide-react";
 import { Course, coursesData, tracks, levels, Level } from "../data/courses";
+import { formatLocationSummary } from "../data/locations";
 import { accentStyles, getTrackAccent } from "../lib/trackAccent";
 import { levelStyles } from "../lib/levelStyle";
 import { Button } from "../components/ui/button";
@@ -64,6 +66,10 @@ const CourseCard = ({ course, onRegister }: CourseCardProps) => {
           <div className="flex items-center gap-2">
             <Award className="w-4 h-4 flex-shrink-0" />
             <span>Certificate</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <MapPin className="w-4 h-4 flex-shrink-0" />
+            <span>{formatLocationSummary(course.locations)}</span>
           </div>
         </div>
 

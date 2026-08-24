@@ -45,7 +45,7 @@ const CONFIG = {
 
 app.post('/api/register', async (req, res) => {
     try {
-        const { name, whatsapp, program, timestamp, track } = req.body;
+        const { name, whatsapp, program, timestamp, track, location, locationName } = req.body;
 
         // Validate input
         if (!name || !whatsapp || !program) {
@@ -69,6 +69,8 @@ app.post('/api/register', async (req, res) => {
             whatsapp,
             program,
             track,
+            location,
+            locationName,
             timestamp: timestamp || new Date().toISOString(),
             status: 'pending'
         };

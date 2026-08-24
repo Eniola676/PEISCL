@@ -1,5 +1,6 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, MapPin } from "lucide-react";
 import { Course } from "../data/courses";
+import { formatLocationSummary } from "../data/locations";
 import { getTrackImage } from "../lib/trackImage";
 import { Button } from "./ui/button";
 
@@ -30,8 +31,13 @@ export const CourseBookingCard = ({ course, onRegister }: CourseBookingCardProps
           {course.title}
         </h3>
 
-        <p className="text-gray-400 mb-4">
+        <p className="text-gray-400 mb-2">
           {course.duration} • {course.track}
+        </p>
+
+        <p className="flex items-center gap-1.5 text-gray-400 mb-4">
+          <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
+          {formatLocationSummary(course.locations)}
         </p>
 
         <p className="text-gray-400 leading-relaxed mb-6 line-clamp-3">

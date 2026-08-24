@@ -480,6 +480,7 @@
                         <td><a href="https://wa.me/${reg.whatsapp.replace(/\D/g, '')}" class="whatsapp-link" target="_blank">${reg.whatsapp}</a></td>
                         <td>${reg.program}</td>
                         <td>${reg.track || '—'}</td>
+                        <td>${reg.locationName || '—'}</td>
                         <td><span class="status-badge status-${reg.status || 'pending'}">${reg.status || 'pending'}</span></td>
                         <td>${new Date(reg.timestamp).toLocaleDateString()} ${new Date(reg.timestamp).toLocaleTimeString()}</td>
                     </tr>
@@ -493,6 +494,7 @@
                             <th>WhatsApp</th>
                             <th>Program</th>
                             <th>Track</th>
+                            <th>Location</th>
                             <th>Status</th>
                             <th>Date</th>
                         </tr>
@@ -505,12 +507,13 @@
         }
 
         function exportToCSV() {
-            const headers = ['Name', 'WhatsApp', 'Program', 'Track', 'Status', 'Timestamp'];
+            const headers = ['Name', 'WhatsApp', 'Program', 'Track', 'Location', 'Status', 'Timestamp'];
             const rows = filteredRegistrations.map(reg => [
                 reg.name,
                 reg.whatsapp,
                 reg.program,
                 reg.track || '',
+                reg.locationName || '',
                 reg.status || 'pending',
                 reg.timestamp
             ]);

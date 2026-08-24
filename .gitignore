@@ -1,6 +1,5 @@
 # Dependencies
 node_modules/
-package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
@@ -13,6 +12,10 @@ pnpm-lock.yaml
 registrations.json
 guidance-requests.json
 newsletter-subscribers.json
+
+# Raw source photography (optimized copies live in public/img and public/portrait)
+/img/
+/portrait img/
 
 # Logs
 *.log
