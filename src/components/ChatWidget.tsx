@@ -20,12 +20,29 @@ const SUGGESTIONS = [
 ];
 
 export const ChatWidget = () => {
+  // Hidden until the backend confirms a chat provider is configured, so the
+  // launcher never appears on a site where every message would fail.
+  const [isEnabled, setIsEnabled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([GREETING]);
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    // Fail closed: any error and the widget simply stays hidden.
+    fetch("/api/health")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!cancelled && data?.checks?.chat?.configured) setIsEnabled(true);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -72,6 +89,8 @@ export const ChatWidget = () => {
     e.preventDefault();
     void send(input);
   };
+
+  if (!isEnabled) return null;
 
   return (
     <>

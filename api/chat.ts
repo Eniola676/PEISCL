@@ -1,7 +1,12 @@
-import Anthropic from "@anthropic-ai/sdk";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { coursesData } from "../src/data/courses.js";
 import { locations, allLocationIds } from "../src/data/locations.js";
+import {
+  activeProvider,
+  askAssistant,
+  ContentRefusedError,
+  type ChatMessage,
+} from "./_lib/chatProvider.js";
 import { badRequest, guardMethod, readJsonBody, serverError } from "./_lib/http.js";
 import { getClientKey, isRateLimited } from "./_lib/rateLimit.js";
 
@@ -20,8 +25,7 @@ const RATE_WINDOW_MS = 10 * 60 * 1000; // per 10 minutes
 
 /**
  * The catalogue is small enough to inline, so the assistant answers from real
- * data instead of guessing. Built once per cold start and cached by Anthropic
- * via cache_control, so repeat turns don't pay full price for it.
+ * data instead of guessing.
  */
 function buildSystemPrompt(): string {
   const courseLines = coursesData
@@ -58,16 +62,11 @@ ${locationLines}
 - When someone seems ready to enrol, point them to the Register button or the "Find My Course" page.`;
 }
 
-interface IncomingMessage {
-  role: "user" | "assistant";
-  content: string;
-}
-
-function parseMessages(value: unknown): IncomingMessage[] | null {
+function parseMessages(value: unknown): ChatMessage[] | null {
   if (!Array.isArray(value) || value.length === 0) return null;
 
   const trimmed = value.slice(-MAX_HISTORY);
-  const parsed: IncomingMessage[] = [];
+  const parsed: ChatMessage[] = [];
 
   for (const entry of trimmed) {
     if (!entry || typeof entry !== "object") return null;
@@ -81,7 +80,7 @@ function parseMessages(value: unknown): IncomingMessage[] | null {
     parsed.push({ role, content: text });
   }
 
-  // The Messages API requires the conversation to begin with a user turn.
+  // Both providers require the conversation to begin with a user turn.
   while (parsed.length && parsed[0].role !== "user") parsed.shift();
   return parsed.length ? parsed : null;
 }
@@ -89,7 +88,7 @@ function parseMessages(value: unknown): IncomingMessage[] | null {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (guardMethod(req, res, "POST")) return;
 
-  if (!process.env.ANTHROPIC_API_KEY) {
+  if (!activeProvider()) {
     return serverError(res, "Chat is not configured");
   }
 
@@ -103,53 +102,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!messages) return badRequest(res, "A valid message is required");
 
   try {
-    const client = new Anthropic();
-
-    const response = await client.messages.create({
-      model: "claude-opus-5",
-      max_tokens: MAX_TOKENS,
-      output_config: { effort: "low" },
-      system: [
-        {
-          type: "text",
-          text: buildSystemPrompt(),
-          cache_control: { type: "ephemeral" },
-        },
-      ],
-      messages,
-    });
-
-    if (response.stop_reason === "refusal") {
-      return res.status(200).json({
-        success: true,
-        reply:
-          "I can't help with that one. Ask me anything about PEISCL's courses and I'll do my best.",
-      });
-    }
-
-    const reply = response.content
-      .filter((block): block is Anthropic.TextBlock => block.type === "text")
-      .map((block) => block.text)
-      .join("\n")
-      .trim();
+    const reply = await askAssistant(buildSystemPrompt(), messages, MAX_TOKENS);
 
     if (!reply) return serverError(res, "Empty response from assistant");
 
     return res.status(200).json({ success: true, reply });
   } catch (error) {
-    if (error instanceof Anthropic.RateLimitError) {
-      console.error("Anthropic rate limit hit:", error.message);
-      return res
-        .status(429)
-        .json({ success: false, error: "We're a bit busy — please try again shortly." });
-    }
-    if (error instanceof Anthropic.AuthenticationError) {
-      console.error("Anthropic auth failed — check ANTHROPIC_API_KEY");
-      return serverError(res, "Chat is not configured");
-    }
-    if (error instanceof Anthropic.APIError) {
-      console.error(`Anthropic API error ${error.status}:`, error.message);
-      return serverError(res, "The assistant is unavailable right now");
+    if (error instanceof ContentRefusedError) {
+      return res.status(200).json({
+        success: true,
+        reply:
+          "I can't help with that one. Ask me anything about PEISCL's courses and I'll do my best.",
+      });
     }
 
     console.error("Chat handler failed:", error);
