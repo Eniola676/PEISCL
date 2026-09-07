@@ -42,9 +42,12 @@ export class ContentRefusedError extends Error {
  */
 const GEMINI_MODEL_CANDIDATES = [
   process.env.GEMINI_MODEL,
-  "gemini-2.5-flash",
-  "gemini-2.0-flash",
+  // Verified working against a live free-tier key (2026-09).
+  "gemini-3.6-flash",
+  // Older IDs kept only as a safety net — Google reports 2.5/2.0 as
+  // "no longer available to new users", so they will fail on new keys.
   "gemini-flash-latest",
+  "gemini-2.5-flash",
 ].filter((m): m is string => Boolean(m));
 
 const GEMINI_MODEL = GEMINI_MODEL_CANDIDATES[0];
@@ -99,7 +102,14 @@ async function askGemini(
   let lastError = "";
 
   for (const model of candidates) {
-    const attempt = await callGemini(model, system, messages, maxTokens);
+    let attempt = await callGemini(model, system, messages, maxTokens);
+
+    // 503/429 are transient (model overloaded / brief rate limit) — one retry
+    // costs little and turns a visible failure into a slightly slower reply.
+    if (attempt.status === 503 || attempt.status === 429) {
+      await new Promise((r) => setTimeout(r, 800));
+      attempt = await callGemini(model, system, messages, maxTokens);
+    }
 
     if (attempt.ok) {
       if (resolvedGeminiModel !== model) {
