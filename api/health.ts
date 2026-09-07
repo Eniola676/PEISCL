@@ -6,7 +6,7 @@ import {
   probeTable,
   TABLES,
 } from "./_lib/airtable.js";
-import { activeProvider } from "./_lib/chatProvider.js";
+import { activeModel, activeProvider, probeChat } from "./_lib/chatProvider.js";
 import { guardMethod } from "./_lib/http.js";
 
 /**
@@ -47,6 +47,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       chat: {
         configured: chat,
         provider,
+        model: activeModel(),
         detail: chat
           ? `Chat is live via ${provider}.`
           : "No GEMINI_API_KEY or ANTHROPIC_API_KEY — the chat widget stays hidden.",
@@ -93,7 +94,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }),
     ]);
 
+    const chatProbe = chat ? await probeChat() : "No chat provider configured";
+
     body.probe = {
+      chat: chatProbe ?? "OK",
       passed: !registrations && !guidance && !newsletter,
       registrations: registrations ?? "OK",
       guidance: guidance ?? "OK",

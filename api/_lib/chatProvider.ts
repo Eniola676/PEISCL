@@ -34,20 +34,40 @@ export class ContentRefusedError extends Error {
 // Gemini (Google AI Studio free tier)
 // -----------------------------------------------------------------------------
 
-// Overridable so a model rename doesn't require a code change.
-const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+/**
+ * Model candidates, tried in order. An explicit GEMINI_MODEL always wins;
+ * the rest are fallbacks so a model rename on Google's side doesn't take the
+ * assistant down. The first one that answers is remembered for the life of
+ * the warm instance.
+ */
+const GEMINI_MODEL_CANDIDATES = [
+  process.env.GEMINI_MODEL,
+  "gemini-2.5-flash",
+  "gemini-2.0-flash",
+  "gemini-flash-latest",
+].filter((m): m is string => Boolean(m));
 
-async function askGemini(
+const GEMINI_MODEL = GEMINI_MODEL_CANDIDATES[0];
+let resolvedGeminiModel: string | null = null;
+
+/** True when the failure looks like "this model doesn't exist", not a real error. */
+function isModelUnavailable(status: number, detail: string): boolean {
+  if (status === 404) return true;
+  return status === 400 && /not found|not supported|unsupported model/i.test(detail);
+}
+
+async function callGemini(
+  model: string,
   system: string,
   messages: ChatMessage[],
   maxTokens: number
-): Promise<string> {
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
+): Promise<Response> {
+  return fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
     {
       method: "POST",
       headers: {
-        "x-goog-api-key": process.env.GEMINI_API_KEY as string,
+        "x-goog-api-key": (process.env.GEMINI_API_KEY as string).trim(),
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -64,13 +84,41 @@ async function askGemini(
       }),
     }
   );
+}
 
-  if (!response.ok) {
-    const detail = await response.text();
-    throw new Error(
-      `Gemini responded ${response.status}: ${detail.slice(0, 400)}`
-    );
+async function askGemini(
+  system: string,
+  messages: ChatMessage[],
+  maxTokens: number
+): Promise<string> {
+  const candidates = resolvedGeminiModel
+    ? [resolvedGeminiModel]
+    : GEMINI_MODEL_CANDIDATES;
+
+  let response: Response | null = null;
+  let lastError = "";
+
+  for (const model of candidates) {
+    const attempt = await callGemini(model, system, messages, maxTokens);
+
+    if (attempt.ok) {
+      if (resolvedGeminiModel !== model) {
+        console.log(`Gemini: using model "${model}"`);
+        resolvedGeminiModel = model;
+      }
+      response = attempt;
+      break;
+    }
+
+    const detail = await attempt.text();
+    lastError = `Gemini responded ${attempt.status} for model "${model}": ${detail.slice(0, 400)}`;
+
+    // Only keep trying if the model itself is the problem. A bad key or a
+    // disabled API would fail identically on every candidate.
+    if (!isModelUnavailable(attempt.status, detail)) break;
   }
+
+  if (!response) throw new Error(lastError || "Gemini request failed");
 
   const data = (await response.json()) as {
     promptFeedback?: { blockReason?: string };
@@ -139,4 +187,43 @@ export async function askAssistant(
   if (provider === "gemini") return askGemini(system, messages, maxTokens);
   if (provider === "anthropic") return askAnthropic(system, messages, maxTokens);
   throw new Error("No chat provider configured");
+}
+
+/** Strips anything key-shaped before an error is shown outside the server. */
+function redact(text: string): string {
+  return text
+    .replace(/AIza[A-Za-z0-9_\-]{10,}/g, "[REDACTED_KEY]")
+    .replace(/sk-ant-[A-Za-z0-9_\-]{10,}/g, "[REDACTED_KEY]")
+    .replace(/pat[A-Za-z0-9]{10,}\.[A-Za-z0-9]{10,}/g, "[REDACTED_KEY]");
+}
+
+/**
+ * Sends a trivial message to verify the provider actually answers.
+ * Returns null on success, or a redacted reason on failure.
+ */
+export async function probeChat(): Promise<string | null> {
+  const provider = activeProvider();
+  if (!provider) return "No chat provider configured";
+
+  try {
+    const reply = await askAssistant(
+      "You are a test harness. Reply with the single word: OK",
+      [{ role: "user", content: "Reply with OK" }],
+      32
+    );
+    return reply ? null : "Provider returned an empty response";
+  } catch (error) {
+    if (error instanceof ContentRefusedError) {
+      return "Provider refused the test message (unexpected, but the API is reachable)";
+    }
+    return redact(error instanceof Error ? error.message : String(error));
+  }
+}
+
+/** The model name currently in use — handy when debugging a rename. */
+export function activeModel(): string | null {
+  const provider = activeProvider();
+  if (provider === "gemini") return resolvedGeminiModel || GEMINI_MODEL;
+  if (provider === "anthropic") return "claude-opus-5";
+  return null;
 }
