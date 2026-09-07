@@ -1,6 +1,7 @@
 import { FormEvent, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Check, Compass, MessageCircle } from "lucide-react";
+import { buildWhatsAppLink, guidanceMessage } from "../lib/whatsapp";
 import { Button } from "../components/ui/button";
 
 const EDUCATION_LEVELS = [
@@ -90,6 +91,7 @@ export const CourseFinderPage = () => {
   const [form, setForm] = useState<FormState>(initialState);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [whatsappLink, setWhatsappLink] = useState("");
   const [error, setError] = useState("");
 
   const update = <K extends keyof FormState>(key: K, value: FormState[K]) =>
@@ -116,24 +118,6 @@ export const CourseFinderPage = () => {
     setStep((s) => Math.max(s - 1, 1));
   };
 
-  const saveGuidanceRequest = async (data: FormState & { timestamp: string }) => {
-    try {
-      const response = await fetch("/api/course-guidance", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) throw new Error("Failed to save guidance request");
-      return await response.json();
-    } catch (err) {
-      console.error("Backend API error, falling back to localStorage:", err);
-      const requests = JSON.parse(localStorage.getItem("guidanceRequests") || "[]");
-      requests.push(data);
-      localStorage.setItem("guidanceRequests", JSON.stringify(requests));
-      return { success: true, fallback: true };
-    }
-  };
-
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!canProceed()) {
@@ -143,11 +127,24 @@ export const CourseFinderPage = () => {
     setIsSubmitting(true);
     setError("");
     try {
-      await saveGuidanceRequest({ ...form, timestamp: new Date().toISOString() });
+      const response = await fetch("/api/course-guidance", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form, timestamp: new Date().toISOString() }),
+      });
+
+      if (!response.ok) {
+        const detail = await response.json().catch(() => ({}));
+        throw new Error(detail?.error || "Failed to save guidance request");
+      }
+
+      setWhatsappLink(buildWhatsAppLink(guidanceMessage(form)));
       setIsSubmitted(true);
     } catch (err) {
       console.error("Guidance request error:", err);
-      setError("Something went wrong. Please try again or contact us directly at 08097545740.");
+      setError(
+        "We couldn't submit your answers. Please try again, or reach us directly on 08097545740."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -164,15 +161,20 @@ export const CourseFinderPage = () => {
             Got it, {form.name.split(" ")[0]}!
           </h1>
           <p className="text-lg text-gray-600 mb-8">
-            Our team will review your answers and reach out to you on WhatsApp within 24–48 hours
-            with a course recommendation.
+            Send your answers over to our team on WhatsApp and we'll come back to you with a
+            course recommendation.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button asChild size="lg">
+          <div className="flex flex-col gap-3 max-w-sm mx-auto">
+            {whatsappLink && (
+              <Button asChild size="lg" className="w-full">
+                <a href={whatsappLink} target="_blank" rel="noreferrer">
+                  <MessageCircle className="w-4 h-4" />
+                  Send on WhatsApp
+                </a>
+              </Button>
+            )}
+            <Button asChild variant="outline" size="lg" className="w-full">
               <Link to="/courses">Browse courses meanwhile</Link>
-            </Button>
-            <Button asChild variant="outline" size="lg">
-              <Link to="/">Back to home</Link>
             </Button>
           </div>
         </div>

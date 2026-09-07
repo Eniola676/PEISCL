@@ -4,6 +4,7 @@ import { Navbar } from "./components/Navbar";
 import { Footer } from "./components/Footer";
 import { RegistrationModal } from "./components/RegistrationModal";
 import { ConfirmationModal } from "./components/ConfirmationModal";
+import { ChatWidget } from "./components/ChatWidget";
 import { HomePage } from "./pages/HomePage";
 import { CoursesPage } from "./pages/CoursesPage";
 import { CourseDetailPage } from "./pages/CourseDetailPage";
@@ -13,13 +14,15 @@ function App() {
   const [isRegistrationOpen, setIsRegistrationOpen] = useState(false);
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<string>();
+  const [whatsappLink, setWhatsappLink] = useState<string>();
 
   const handleRegisterClick = (courseName?: string) => {
     setSelectedCourse(courseName);
     setIsRegistrationOpen(true);
   };
 
-  const handleRegistrationSuccess = () => {
+  const handleRegistrationSuccess = (link: string) => {
+    setWhatsappLink(link);
     setIsConfirmationOpen(true);
   };
 
@@ -46,6 +49,8 @@ function App() {
 
         <Footer />
 
+        <ChatWidget />
+
         {/* Modals */}
         <RegistrationModal
           isOpen={isRegistrationOpen}
@@ -57,6 +62,7 @@ function App() {
         <ConfirmationModal
           isOpen={isConfirmationOpen}
           onClose={() => setIsConfirmationOpen(false)}
+          whatsappLink={whatsappLink}
         />
       </div>
     </BrowserRouter>

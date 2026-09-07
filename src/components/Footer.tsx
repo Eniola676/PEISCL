@@ -8,22 +8,16 @@ const MAP_COORDS = "9.0333,7.4833";
 const MAP_BBOX = "7.4633,9.0133,7.5033,9.0533";
 
 const saveSubscriber = async (email: string) => {
-  const payload = { email, timestamp: new Date().toISOString() };
-  try {
-    const response = await fetch("/api/newsletter", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    if (!response.ok) throw new Error("Failed to save subscriber");
-    return await response.json();
-  } catch (error) {
-    console.error("Backend API error, falling back to localStorage:", error);
-    const subscribers = JSON.parse(localStorage.getItem("newsletterSubscribers") || "[]");
-    subscribers.push(payload);
-    localStorage.setItem("newsletterSubscribers", JSON.stringify(subscribers));
-    return { success: true, fallback: true };
+  const response = await fetch("/api/newsletter", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, timestamp: new Date().toISOString() }),
+  });
+  if (!response.ok) {
+    const detail = await response.json().catch(() => ({}));
+    throw new Error(detail?.error || "Failed to save subscriber");
   }
+  return response.json();
 };
 
 export const Footer = () => {
@@ -31,15 +25,20 @@ export const Footer = () => {
   const [email, setEmail] = useState("");
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [subscribeError, setSubscribeError] = useState("");
 
   const handleSubscribe = async (e: FormEvent) => {
     e.preventDefault();
     if (!email.trim()) return;
     setIsSubmitting(true);
+    setSubscribeError("");
     try {
       await saveSubscriber(email.trim());
       setIsSubscribed(true);
       setEmail("");
+    } catch (error) {
+      console.error("Newsletter signup failed:", error);
+      setSubscribeError("Couldn't subscribe just now. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -99,6 +98,11 @@ export const Footer = () => {
                 >
                   <Send className="w-4 h-4" />
                 </Button>
+                {subscribeError && (
+                  <p className="mt-2 text-sm text-red-600" role="alert">
+                    {subscribeError}
+                  </p>
+                )}
               </form>
             )}
           </div>

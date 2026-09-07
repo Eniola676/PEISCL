@@ -1,11 +1,17 @@
+import { MessageCircle } from "lucide-react";
 import { Button } from "./ui/button";
 
 interface ConfirmationModalProps {
   isOpen: boolean;
   onClose: () => void;
+  whatsappLink?: string;
 }
 
-export const ConfirmationModal = ({ isOpen, onClose }: ConfirmationModalProps) => {
+export const ConfirmationModal = ({
+  isOpen,
+  onClose,
+  whatsappLink,
+}: ConfirmationModalProps) => {
   if (!isOpen) return null;
 
   return (
@@ -21,19 +27,31 @@ export const ConfirmationModal = ({ isOpen, onClose }: ConfirmationModalProps) =
         </div>
 
         <h2 className="text-3xl sm:text-4xl font-semibold mb-3 tracking-tight">
-          You're on the list.
+          We've got your details.
         </h2>
         <p className="text-lg text-gray-600 mb-8">
-          Check WhatsApp for your confirmation message and next steps.
+          Send them to our team on WhatsApp and we'll confirm your spot right away.
         </p>
 
-        <Button
-          size="lg"
-          onClick={onClose}
-          className="w-full sm:w-auto hover:-translate-y-1 hover:shadow-2xl"
-        >
-          Done
-        </Button>
+        <div className="flex flex-col gap-3">
+          {whatsappLink && (
+            <Button asChild size="lg" className="w-full">
+              <a href={whatsappLink} target="_blank" rel="noreferrer">
+                <MessageCircle className="w-4 h-4" />
+                Send on WhatsApp
+              </a>
+            </Button>
+          )}
+
+          <Button
+            variant="ghost"
+            size="lg"
+            onClick={onClose}
+            className="w-full text-gray-600"
+          >
+            Done
+          </Button>
+        </div>
       </div>
     </div>
   );

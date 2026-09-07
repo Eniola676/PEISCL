@@ -2,13 +2,14 @@ import { useState, FormEvent, useEffect } from "react";
 import { Check, MapPin, Video } from "lucide-react";
 import { coursesData, tracks } from "../data/courses";
 import { locations, allLocationIds, LocationId } from "../data/locations";
+import { buildWhatsAppLink, registrationMessage } from "../lib/whatsapp";
 import { Button } from "./ui/button";
 
 interface RegistrationModalProps {
   isOpen: boolean;
   onClose: () => void;
   selectedCourse?: string;
-  onSuccess: () => void;
+  onSuccess: (whatsappLink: string) => void;
 }
 
 const allCourses = tracks.map((track) => ({
@@ -27,6 +28,7 @@ export const RegistrationModal = ({
   const [program, setProgram] = useState(selectedCourse || "");
   const [location, setLocation] = useState<LocationId | "">("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   const selectedCourseData = coursesData.find((c) => c.title === program);
   const availableLocationIds = selectedCourseData ? selectedCourseData.locations : allLocationIds;
@@ -47,77 +49,51 @@ export const RegistrationModal = ({
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!location) return;
-    setIsSubmitting(true);
 
+    setIsSubmitting(true);
+    setError("");
+
+    const locationName = locations[location].name;
     const formData = {
       name,
       whatsapp,
       program,
       location,
-      locationName: locations[location].name,
+      locationName,
       timestamp: new Date().toISOString(),
     };
 
     try {
-      // Save to backend
-      await saveRegistration(formData);
+      const response = await fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
 
-      // Send WhatsApp confirmation
-      await sendWhatsAppMessage(formData);
+      if (!response.ok) {
+        const detail = await response.json().catch(() => ({}));
+        throw new Error(detail?.error || "Failed to save registration");
+      }
 
-      // Reset form
+      // Hand the details off to support over WhatsApp.
+      const link = buildWhatsAppLink(
+        registrationMessage({ name, whatsapp, program, locationName })
+      );
+
       setName("");
       setWhatsapp("");
       setProgram("");
       setLocation("");
 
-      // Close modal and show success
       onClose();
-      onSuccess();
-    } catch (error) {
-      console.error("Registration error:", error);
-      alert("Something went wrong. Please try again or contact us directly at 08097545740");
+      onSuccess(link);
+    } catch (err) {
+      console.error("Registration error:", err);
+      setError(
+        "We couldn't submit your registration. Please try again, or reach us directly on 08097545740."
+      );
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  const saveRegistration = async (data: any) => {
-    try {
-      const response = await fetch("/api/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) throw new Error("Failed to save registration");
-      return await response.json();
-    } catch (error) {
-      console.error("Backend API error, falling back to localStorage:", error);
-      const registrations = JSON.parse(localStorage.getItem("registrations") || "[]");
-      registrations.push(data);
-      localStorage.setItem("registrations", JSON.stringify(registrations));
-      return { success: true, fallback: true };
-    }
-  };
-
-  const sendWhatsAppMessage = async (data: any) => {
-    try {
-      const response = await fetch("/api/send-whatsapp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          to: data.whatsapp,
-          name: data.name,
-          program: data.program,
-        }),
-      });
-
-      if (!response.ok) console.warn("WhatsApp API returned error, but continuing...");
-      return await response.json();
-    } catch (error) {
-      console.error("WhatsApp API error:", error);
-      return { success: false, error: error };
     }
   };
 
@@ -258,6 +234,12 @@ export const RegistrationModal = ({
               })}
             </div>
           </div>
+
+          {error && (
+            <p className="text-sm text-red-600 mb-4" role="alert">
+              {error}
+            </p>
+          )}
 
           <Button
             type="submit"

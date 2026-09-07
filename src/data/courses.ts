@@ -16,6 +16,8 @@ export interface Course {
   level: string;
   levels: Level[];
   locations: LocationId[];
+  /** Price in Naira. 0 means "not priced yet" — online payment stays disabled. */
+  priceNgn: number;
   overview: string;
   objectives?: string[];
   prerequisites?: string[];
@@ -29,6 +31,13 @@ export interface Course {
 // Slugs of courses offered only at the Jabi campus (e.g. executive/leadership-oriented
 // courses). Update this list once confirmed — everything else defaults to all 3 locations.
 const JABI_ONLY_COURSE_SLUGS: string[] = [];
+
+/**
+ * Course prices in Naira, keyed by slug. Anything missing or 0 is treated as
+ * "not priced yet" and Paystack checkout stays disabled for that course.
+ * Fill these in (and set PAYSTACK_ENABLED=true) to switch payments on.
+ */
+const COURSE_PRICES_NGN: Record<string, number> = {};
 
 export const tracks = [
   "Data & AI",
@@ -44,7 +53,7 @@ const deriveLevels = (level: string): Level[] => {
   return found.length ? found : ["Beginner"];
 };
 
-type RawCourse = Omit<Course, "levels" | "locations">;
+type RawCourse = Omit<Course, "levels" | "locations" | "priceNgn">;
 
 const courseList: RawCourse[] = [
   {
@@ -846,6 +855,7 @@ export const coursesData: Course[] = courseList.map((course) => ({
   ...course,
   levels: deriveLevels(course.level),
   locations: JABI_ONLY_COURSE_SLUGS.includes(course.slug) ? (["jabi"] as LocationId[]) : allLocationIds,
+  priceNgn: COURSE_PRICES_NGN[course.slug] ?? 0,
 }));
 
 export const getCourseBySlug = (slug: string) =>
