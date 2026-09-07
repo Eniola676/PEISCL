@@ -35,19 +35,28 @@ export class ContentRefusedError extends Error {
 // -----------------------------------------------------------------------------
 
 /**
- * Model candidates, tried in order. An explicit GEMINI_MODEL always wins;
- * the rest are fallbacks so a model rename on Google's side doesn't take the
- * assistant down. The first one that answers is remembered for the life of
- * the warm instance.
+ * Model candidates, tried in order. An explicit GEMINI_MODEL always wins.
+ *
+ * These are all "lite" models, chosen by measurement rather than by capability
+ * on paper: on Google's free tier the full Flash models allow roughly one
+ * request before returning 429 RESOURCE_EXHAUSTED, which is useless for a
+ * public support widget. Measured over 5 back-to-back requests per model:
+ *
+ *   gemini-flash-lite-latest   5/5 ok   avg 1.2s   worst 1.9s
+ *   gemini-3.5-flash-lite      5/5 ok   avg 1.6s   worst 3.7s
+ *   gemini-3.1-flash-lite      5/5 ok   avg 4.4s   worst 7.5s
+ *   gemini-3.6-flash           0/5      all 429
+ *
+ * The alias leads so the site follows Google's current lite model without a
+ * deploy; the pinned IDs behind it cover the alias being retired or throttled.
  */
 const GEMINI_MODEL_CANDIDATES = [
   process.env.GEMINI_MODEL,
-  // Verified working against a live free-tier key (2026-09).
+  "gemini-flash-lite-latest",
+  "gemini-3.5-flash-lite",
+  "gemini-3.1-flash-lite",
+  // Last resort only: capable, but free-tier quota rejects almost every call.
   "gemini-3.6-flash",
-  // Older IDs kept only as a safety net — Google reports 2.5/2.0 as
-  // "no longer available to new users", so they will fail on new keys.
-  "gemini-flash-latest",
-  "gemini-2.5-flash",
 ].filter((m): m is string => Boolean(m));
 
 const GEMINI_MODEL = GEMINI_MODEL_CANDIDATES[0];
@@ -59,6 +68,18 @@ function isModelUnavailable(status: number, detail: string): boolean {
   return status === 400 && /not found|not supported|unsupported model/i.test(detail);
 }
 
+/**
+ * True when another model is worth trying: the free tier hands out
+ * 429 RESOURCE_EXHAUSTED per model, so a sibling model often answers
+ * immediately when this one won't.
+ */
+function shouldTryNextModel(status: number, detail: string): boolean {
+  return status === 429 || status === 503 || isModelUnavailable(status, detail);
+}
+
+/** Well under the 30s function limit, leaving room to try another model. */
+const GEMINI_TIMEOUT_MS = 12_000;
+
 async function callGemini(
   model: string,
   system: string,
@@ -69,6 +90,7 @@ async function callGemini(
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
     {
       method: "POST",
+      signal: AbortSignal.timeout(GEMINI_TIMEOUT_MS),
       headers: {
         "x-goog-api-key": (process.env.GEMINI_API_KEY as string).trim(),
         "Content-Type": "application/json",
@@ -81,6 +103,9 @@ async function callGemini(
           parts: [{ text: m.content }],
         })),
         generationConfig: {
+          // These models think before answering and thought tokens come out of
+          // this budget, so it must stay well clear of the answer length or the
+          // reply arrives empty.
           maxOutputTokens: maxTokens,
           temperature: 0.3,
         },
@@ -89,26 +114,44 @@ async function callGemini(
   );
 }
 
+async function callGeminiSafely(
+  model: string,
+  system: string,
+  messages: ChatMessage[],
+  maxTokens: number
+): Promise<Response | Error> {
+  try {
+    return await callGemini(model, system, messages, maxTokens);
+  } catch (error) {
+    // A network failure or the abort timeout — treat like an unavailable model
+    // so the loop moves on instead of taking the whole assistant down.
+    return error instanceof Error ? error : new Error(String(error));
+  }
+}
+
 async function askGemini(
   system: string,
   messages: ChatMessage[],
   maxTokens: number
 ): Promise<string> {
+  // A remembered model is tried first, but the full list stays behind it: the
+  // model that worked a minute ago may be out of quota now.
   const candidates = resolvedGeminiModel
-    ? [resolvedGeminiModel]
+    ? [
+        resolvedGeminiModel,
+        ...GEMINI_MODEL_CANDIDATES.filter((m) => m !== resolvedGeminiModel),
+      ]
     : GEMINI_MODEL_CANDIDATES;
 
   let response: Response | null = null;
   let lastError = "";
 
   for (const model of candidates) {
-    let attempt = await callGemini(model, system, messages, maxTokens);
+    const attempt = await callGeminiSafely(model, system, messages, maxTokens);
 
-    // 503/429 are transient (model overloaded / brief rate limit) — one retry
-    // costs little and turns a visible failure into a slightly slower reply.
-    if (attempt.status === 503 || attempt.status === 429) {
-      await new Promise((r) => setTimeout(r, 800));
-      attempt = await callGemini(model, system, messages, maxTokens);
+    if (attempt instanceof Error) {
+      lastError = `Gemini request to "${model}" failed: ${attempt.message}`;
+      continue;
     }
 
     if (attempt.ok) {
@@ -123,9 +166,12 @@ async function askGemini(
     const detail = await attempt.text();
     lastError = `Gemini responded ${attempt.status} for model "${model}": ${detail.slice(0, 400)}`;
 
-    // Only keep trying if the model itself is the problem. A bad key or a
-    // disabled API would fail identically on every candidate.
-    if (!isModelUnavailable(attempt.status, detail)) break;
+    // Anything else (a bad key, a disabled API) would fail identically on every
+    // candidate, so stop rather than burn the whole list.
+    if (!shouldTryNextModel(attempt.status, detail)) break;
+
+    // The remembered model just failed; don't keep preferring it.
+    if (resolvedGeminiModel === model) resolvedGeminiModel = null;
   }
 
   if (!response) throw new Error(lastError || "Gemini request failed");
@@ -219,7 +265,8 @@ export async function probeChat(): Promise<string | null> {
     const reply = await askAssistant(
       "You are a test harness. Reply with the single word: OK",
       [{ role: "user", content: "Reply with OK" }],
-      32
+      // Must exceed the thinking budget or the reply comes back empty.
+      512
     );
     return reply ? null : "Provider returned an empty response";
   } catch (error) {

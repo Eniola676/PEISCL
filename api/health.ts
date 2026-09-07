@@ -19,6 +19,12 @@ import { guardMethod } from "./_lib/http.js";
  * setting the site up; it's the fastest way to find a table or field-name
  * mismatch.
  */
+/**
+ * ?probe=1 makes four network round trips (three Airtable write/deletes plus a
+ * model call), which can exceed Vercel's 10s default.
+ */
+export const config = { maxDuration: 30 };
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (guardMethod(req, res, "GET")) return;
 
