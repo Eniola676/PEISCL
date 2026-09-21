@@ -11,7 +11,7 @@ import {
   Compass,
   MapPin,
 } from "lucide-react";
-import { Course, coursesData, tracks, levels, Level } from "../data/courses";
+import { Course, coursesData, tracks, levels, Level, formatPrice } from "../data/courses";
 import { formatLocationSummary } from "../data/locations";
 import { accentStyles, getTrackAccent } from "../lib/trackAccent";
 import { levelStyles } from "../lib/levelStyle";
@@ -74,6 +74,11 @@ const CourseCard = ({ course, onRegister }: CourseCardProps) => {
         </div>
 
         <p className="text-gray-600 mb-6">{course.overview}</p>
+
+        <div className="mb-6">
+          <span className="text-2xl font-semibold text-gray-900">{formatPrice(course.priceNgn)}</span>
+          {course.priceNgn > 0 && <span className="text-sm text-gray-500"> course fee</span>}
+        </div>
 
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <Link

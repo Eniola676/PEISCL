@@ -41,6 +41,17 @@ export function isValidEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
+/**
+ * Consent record fields (NDPA 2023 s.26(2): the controller must be able to
+ * show that consent was given, and to which notice).
+ */
+export function consentFields(body: Record<string, unknown>): Record<string, unknown> {
+  return {
+    "Consent Given At": new Date().toISOString(),
+    "Privacy Notice Version": cleanString(body.privacyNoticeVersion, 40),
+  };
+}
+
 /** Returns an ISO timestamp, preferring a valid client-supplied one. */
 export function safeTimestamp(value: unknown): string {
   if (typeof value === "string") {

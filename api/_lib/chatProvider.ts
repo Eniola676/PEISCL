@@ -1,11 +1,11 @@
 /**
  * Chat provider abstraction.
  *
- * Picks whichever provider is configured, so the site can start on Gemini's
- * free tier and move to Claude later by swapping an environment variable —
- * no code change required.
+ * Picks whichever provider is configured, so the site can move between free
+ * and paid providers by swapping an environment variable — no code change
+ * required.
  *
- * Priority: GEMINI_API_KEY, then ANTHROPIC_API_KEY.
+ * Priority: GROQ_API_KEY, then GEMINI_API_KEY, then ANTHROPIC_API_KEY.
  */
 
 export type ChatRole = "user" | "assistant";
@@ -14,9 +14,10 @@ export interface ChatMessage {
   content: string;
 }
 
-export type ProviderName = "gemini" | "anthropic" | null;
+export type ProviderName = "groq" | "gemini" | "anthropic" | null;
 
 export function activeProvider(): ProviderName {
+  if (process.env.GROQ_API_KEY) return "groq";
   if (process.env.GEMINI_API_KEY) return "gemini";
   if (process.env.ANTHROPIC_API_KEY) return "anthropic";
   return null;
@@ -28,6 +29,100 @@ export class ContentRefusedError extends Error {
     super("Content refused");
     this.name = "ContentRefusedError";
   }
+}
+
+// -----------------------------------------------------------------------------
+// Groq (free tier, OpenAI-compatible API)
+// -----------------------------------------------------------------------------
+
+/**
+ * Model candidates, tried in order. An explicit GROQ_MODEL always wins.
+ *
+ * Non-reasoning models lead: they answer straight away, so the whole token
+ * budget goes to the reply. Free-tier limits are per model, so when one
+ * returns 429 a sibling usually still answers.
+ */
+const GROQ_MODEL_CANDIDATES = [
+  process.env.GROQ_MODEL,
+  "llama-3.3-70b-versatile",
+  "llama-3.1-8b-instant",
+  "openai/gpt-oss-20b",
+].filter((m): m is string => Boolean(m));
+
+let resolvedGroqModel: string | null = null;
+
+const GROQ_TIMEOUT_MS = 12_000;
+
+async function callGroq(
+  model: string,
+  system: string,
+  messages: ChatMessage[],
+  maxTokens: number
+): Promise<Response | Error> {
+  try {
+    return await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      signal: AbortSignal.timeout(GROQ_TIMEOUT_MS),
+      headers: {
+        Authorization: `Bearer ${(process.env.GROQ_API_KEY as string).trim()}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model,
+        messages: [{ role: "system", content: system }, ...messages],
+        max_tokens: maxTokens,
+        temperature: 0.3,
+      }),
+    });
+  } catch (error) {
+    // Network failure or timeout — move on to the next model.
+    return error instanceof Error ? error : new Error(String(error));
+  }
+}
+
+async function askGroq(
+  system: string,
+  messages: ChatMessage[],
+  maxTokens: number
+): Promise<string> {
+  const candidates = resolvedGroqModel
+    ? [resolvedGroqModel, ...GROQ_MODEL_CANDIDATES.filter((m) => m !== resolvedGroqModel)]
+    : GROQ_MODEL_CANDIDATES;
+
+  let response: Response | null = null;
+  let lastError = "";
+
+  for (const model of candidates) {
+    const attempt = await callGroq(model, system, messages, maxTokens);
+
+    if (attempt instanceof Error) {
+      lastError = `Groq request to "${model}" failed: ${attempt.message}`;
+      continue;
+    }
+
+    if (attempt.ok) {
+      if (resolvedGroqModel !== model) {
+        console.log(`Groq: using model "${model}"`);
+        resolvedGroqModel = model;
+      }
+      response = attempt;
+      break;
+    }
+
+    const detail = await attempt.text();
+    lastError = `Groq responded ${attempt.status} for model "${model}": ${detail.slice(0, 400)}`;
+
+    // A bad key fails identically on every model, so stop early.
+    if (!shouldTryNextModel(attempt.status, detail)) break;
+    if (resolvedGroqModel === model) resolvedGroqModel = null;
+  }
+
+  if (!response) throw new Error(lastError || "Groq request failed");
+
+  const data = (await response.json()) as {
+    choices?: Array<{ message?: { content?: string | null } }>;
+  };
+  return (data.choices?.[0]?.message?.content || "").trim();
 }
 
 // -----------------------------------------------------------------------------
@@ -65,7 +160,7 @@ let resolvedGeminiModel: string | null = null;
 /** True when the failure looks like "this model doesn't exist", not a real error. */
 function isModelUnavailable(status: number, detail: string): boolean {
   if (status === 404) return true;
-  return status === 400 && /not found|not supported|unsupported model/i.test(detail);
+  return status === 400 && /not found|not supported|unsupported model|decommissioned/i.test(detail);
 }
 
 /**
@@ -240,6 +335,7 @@ export async function askAssistant(
   maxTokens: number
 ): Promise<string> {
   const provider = activeProvider();
+  if (provider === "groq") return askGroq(system, messages, maxTokens);
   if (provider === "gemini") return askGemini(system, messages, maxTokens);
   if (provider === "anthropic") return askAnthropic(system, messages, maxTokens);
   throw new Error("No chat provider configured");
@@ -250,6 +346,7 @@ function redact(text: string): string {
   return text
     .replace(/AIza[A-Za-z0-9_\-]{10,}/g, "[REDACTED_KEY]")
     .replace(/sk-ant-[A-Za-z0-9_\-]{10,}/g, "[REDACTED_KEY]")
+    .replace(/gsk_[A-Za-z0-9]{10,}/g, "[REDACTED_KEY]")
     .replace(/pat[A-Za-z0-9]{10,}\.[A-Za-z0-9]{10,}/g, "[REDACTED_KEY]");
 }
 
@@ -280,6 +377,7 @@ export async function probeChat(): Promise<string | null> {
 /** The model name currently in use — handy when debugging a rename. */
 export function activeModel(): string | null {
   const provider = activeProvider();
+  if (provider === "groq") return resolvedGroqModel || GROQ_MODEL_CANDIDATES[0];
   if (provider === "gemini") return resolvedGeminiModel || GEMINI_MODEL;
   if (provider === "anthropic") return "claude-opus-5";
   return null;

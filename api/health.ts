@@ -56,7 +56,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         model: activeModel(),
         detail: chat
           ? `Chat is live via ${provider}.`
-          : "No GEMINI_API_KEY or ANTHROPIC_API_KEY — the chat widget stays hidden.",
+          : "No GROQ_API_KEY, GEMINI_API_KEY or ANTHROPIC_API_KEY — the chat widget stays hidden.",
       },
       payments: {
         configured: paystackEnabled && paystackKey,

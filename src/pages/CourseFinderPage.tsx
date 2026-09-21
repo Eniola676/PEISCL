@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Check, Compass, MessageCircle } from "lucide-react";
 import { buildWhatsAppLink, guidanceMessage } from "../lib/whatsapp";
 import { Button } from "../components/ui/button";
+import { ConsentCheckbox } from "../components/ConsentCheckbox";
+import { PRIVACY_NOTICE_VERSION } from "../lib/privacy";
 
 const EDUCATION_LEVELS = [
   "No formal education",
@@ -93,6 +95,7 @@ export const CourseFinderPage = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [whatsappLink, setWhatsappLink] = useState("");
   const [error, setError] = useState("");
+  const [consent, setConsent] = useState(false);
 
   const update = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -101,7 +104,7 @@ export const CourseFinderPage = () => {
     if (step === 1) return form.name.trim() !== "" && form.whatsapp.trim() !== "";
     if (step === 2) return form.educationLevel !== "" && form.computerLiteracy !== "";
     if (step === 3) return form.interests.length > 0;
-    return true;
+    return consent;
   };
 
   const goNext = () => {
@@ -121,7 +124,7 @@ export const CourseFinderPage = () => {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!canProceed()) {
-      setError("Please tell us what you're interested in before submitting.");
+      setError("Please agree to the privacy terms before submitting.");
       return;
     }
     setIsSubmitting(true);
@@ -130,7 +133,12 @@ export const CourseFinderPage = () => {
       const response = await fetch("/api/course-guidance", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, timestamp: new Date().toISOString() }),
+        body: JSON.stringify({
+          ...form,
+          consent,
+          privacyNoticeVersion: PRIVACY_NOTICE_VERSION,
+          timestamp: new Date().toISOString(),
+        }),
       });
 
       if (!response.ok) {
@@ -352,6 +360,13 @@ export const CourseFinderPage = () => {
                   className={`${inputClass} resize-none`}
                 />
               </Field>
+
+              <ConsentCheckbox
+                id="guidance-consent"
+                checked={consent}
+                onChange={setConsent}
+                purpose="recommend a course and contact me about it on WhatsApp"
+              />
             </div>
           )}
 
@@ -380,7 +395,7 @@ export const CourseFinderPage = () => {
                 <ArrowRight className="w-4 h-4" />
               </Button>
             ) : (
-              <Button key="submit-btn" type="submit" disabled={isSubmitting} className="ml-auto">
+              <Button key="submit-btn" type="submit" disabled={isSubmitting || !consent} className="ml-auto">
                 <MessageCircle className="w-4 h-4" />
                 {isSubmitting ? "Submitting..." : "Get my recommendation"}
               </Button>

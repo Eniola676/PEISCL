@@ -59,8 +59,29 @@ export function isBaseIdWellFormed(): boolean {
 /**
  * Creates a single record. `typecast` lets Airtable coerce strings into
  * single-select / multi-select options so the table schema stays forgiving.
+ *
+ * `optionalFields` are written when the table has columns for them. If Airtable
+ * rejects them as unknown, the record is saved without them rather than lost.
  */
 export async function createRecord(
+  table: string,
+  fields: Record<string, unknown>,
+  optionalFields: Record<string, unknown> = {}
+): Promise<{ id: string }> {
+  if (Object.keys(optionalFields).length > 0) {
+    try {
+      return await postRecord(table, { ...fields, ...optionalFields });
+    } catch (error) {
+      if (!String(error).includes("UNKNOWN_FIELD_NAME")) throw error;
+      console.warn(
+        `Airtable table "${table}" is missing optional columns (${Object.keys(optionalFields).join(", ")}); saving without them. See BACKEND.md.`
+      );
+    }
+  }
+  return postRecord(table, fields);
+}
+
+async function postRecord(
   table: string,
   fields: Record<string, unknown>
 ): Promise<{ id: string }> {

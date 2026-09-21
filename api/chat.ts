@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { coursesData } from "../src/data/courses.js";
+import { coursesData, formatPrice } from "../src/data/courses.js";
 import { locations, allLocationIds } from "../src/data/locations.js";
 import {
   activeProvider,
@@ -31,7 +31,7 @@ function buildSystemPrompt(): string {
   const courseLines = coursesData
     .map((course) => {
       const where = course.locations.map((id) => locations[id].name).join(", ");
-      return `- ${course.title} | Track: ${course.track} | Level: ${course.level} | Duration: ${course.duration} | Available at: ${where}`;
+      return `- ${course.title} | Track: ${course.track} | Level: ${course.level} | Duration: ${course.duration} | Fee: ${formatPrice(course.priceNgn)} | Available at: ${where}`;
     })
     .join("\n");
 
@@ -56,7 +56,7 @@ ${locationLines}
 
 ## Rules
 - Only answer questions about PEISCL, its courses, and getting started. If asked about anything unrelated, say that's outside what you can help with and offer to answer a course question instead.
-- NEVER state or estimate a price, fee, or discount. Pricing is not published. If asked about cost, say pricing isn't listed publicly and point them to WhatsApp on 08097545740 or the registration form so the team can share current fees.
+- Only quote the fee listed for a course above. Never estimate, negotiate, or offer discounts or payment plans. If a course's fee says "Contact us", or they ask about discounts or instalments, point them to WhatsApp on 08097545740.
 - Never invent courses, dates, cohort start times, durations, or locations. If it isn't in the data above, say you don't have that detail and refer them to the team.
 - Be concise — usually 2-4 sentences. Use plain language; many visitors are new to tech.
 - When someone seems ready to enrol, point them to the Register button or the "Find My Course" page.`;

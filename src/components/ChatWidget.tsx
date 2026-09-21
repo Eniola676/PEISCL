@@ -114,6 +114,12 @@ export const ChatWidget = () => {
             <div className="text-sm text-gray-500">
               Free to ask — answers come from our course catalogue.
             </div>
+            <div className="text-xs text-gray-400 mt-1">
+              Replies are AI-generated. Please don't share personal details.{" "}
+              <a href="/privacy" target="_blank" className="underline hover:text-gray-600">
+                Privacy
+              </a>
+            </div>
           </div>
 
           <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 py-4 space-y-3">

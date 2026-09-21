@@ -9,6 +9,7 @@ import { HomePage } from "./pages/HomePage";
 import { CoursesPage } from "./pages/CoursesPage";
 import { CourseDetailPage } from "./pages/CourseDetailPage";
 import { CourseFinderPage } from "./pages/CourseFinderPage";
+import { PrivacyPage } from "./pages/PrivacyPage";
 
 function App() {
   const [isRegistrationOpen, setIsRegistrationOpen] = useState(false);
@@ -45,6 +46,7 @@ function App() {
             element={<CourseDetailPage onRegisterClick={handleRegisterClick} />}
           />
           <Route path="/find-my-course" element={<CourseFinderPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
         </Routes>
 
         <Footer />

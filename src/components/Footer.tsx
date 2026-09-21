@@ -2,6 +2,7 @@ import { FormEvent, useState } from "react";
 import { Link } from "react-router-dom";
 import { Mail, Phone, MapPin, Send, MessageCircle } from "lucide-react";
 import { Button } from "./ui/button";
+import { PRIVACY_NOTICE_VERSION } from "../lib/privacy";
 
 const ADDRESS = "Garki, Abuja 900103, Federal Capital Territory";
 const MAP_COORDS = "9.0333,7.4833";
@@ -11,7 +12,12 @@ const saveSubscriber = async (email: string) => {
   const response = await fetch("/api/newsletter", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, timestamp: new Date().toISOString() }),
+    body: JSON.stringify({
+      email,
+      consent: true,
+      privacyNoticeVersion: PRIVACY_NOTICE_VERSION,
+      timestamp: new Date().toISOString(),
+    }),
   });
   if (!response.ok) {
     const detail = await response.json().catch(() => ({}));
@@ -98,6 +104,13 @@ export const Footer = () => {
                 >
                   <Send className="w-4 h-4" />
                 </Button>
+                <p className="mt-2 text-xs text-gray-500">
+                  By subscribing you agree to receive our emails. Unsubscribe any time. See our{" "}
+                  <Link to="/privacy" className="underline hover:text-gray-900">
+                    Privacy Notice
+                  </Link>
+                  .
+                </p>
                 {subscribeError && (
                   <p className="mt-2 text-sm text-red-600" role="alert">
                     {subscribeError}
@@ -124,6 +137,9 @@ export const Footer = () => {
                 className="text-gray-600 hover:text-gray-900 transition-colors w-fit"
               >
                 Find My Course
+              </Link>
+              <Link to="/privacy" className="text-gray-600 hover:text-gray-900 transition-colors w-fit">
+                Privacy Notice
               </Link>
               <Link to="/#about" className="text-gray-600 hover:text-gray-900 transition-colors w-fit">
                 About
@@ -212,7 +228,10 @@ export const Footer = () => {
         {/* Bottom */}
         <div className="mt-12 pt-8 border-t border-gray-300/70 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-gray-500 text-sm">
-            © {currentYear} PEISCL. All rights reserved.
+            © {currentYear} PEISCL. All rights reserved. ·{" "}
+            <Link to="/privacy" className="hover:text-gray-900 transition-colors">
+              Privacy
+            </Link>
           </p>
           <p className="text-gray-500 text-sm">
             Built by{" "}

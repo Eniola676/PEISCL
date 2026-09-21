@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createRecord, isAirtableConfigured, TABLES } from "./_lib/airtable.js";
 import { badRequest, guardMethod, readJsonBody, serverError } from "./_lib/http.js";
-import { LIMITS, cleanString, isValidEmail, safeTimestamp } from "./_lib/validate.js";
+import { LIMITS, cleanString, isValidEmail, safeTimestamp, consentFields } from "./_lib/validate.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (guardMethod(req, res, "POST")) return;
@@ -12,6 +12,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!email) return badRequest(res, "Email is required");
   if (!isValidEmail(email)) return badRequest(res, "That email looks invalid");
 
+  if (body.consent !== true) return badRequest(res, "Consent is required");
+
   if (!isAirtableConfigured()) {
     return serverError(res, "Storage is not configured");
   }
@@ -20,7 +22,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const record = await createRecord(TABLES.newsletter, {
       Email: email,
       "Subscribed At": safeTimestamp(body.timestamp),
-    });
+    }, consentFields(body));
 
     return res.status(200).json({ success: true, id: record.id });
   } catch (error) {

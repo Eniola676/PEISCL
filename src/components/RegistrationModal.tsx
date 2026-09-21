@@ -4,6 +4,8 @@ import { coursesData, tracks } from "../data/courses";
 import { locations, allLocationIds, LocationId } from "../data/locations";
 import { buildWhatsAppLink, registrationMessage } from "../lib/whatsapp";
 import { Button } from "./ui/button";
+import { ConsentCheckbox } from "./ConsentCheckbox";
+import { PRIVACY_NOTICE_VERSION } from "../lib/privacy";
 
 interface RegistrationModalProps {
   isOpen: boolean;
@@ -27,6 +29,7 @@ export const RegistrationModal = ({
   const [whatsapp, setWhatsapp] = useState("");
   const [program, setProgram] = useState(selectedCourse || "");
   const [location, setLocation] = useState<LocationId | "">("");
+  const [consent, setConsent] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -48,7 +51,7 @@ export const RegistrationModal = ({
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!location) return;
+    if (!location || !consent) return;
 
     setIsSubmitting(true);
     setError("");
@@ -60,6 +63,8 @@ export const RegistrationModal = ({
       program,
       location,
       locationName,
+      consent,
+      privacyNoticeVersion: PRIVACY_NOTICE_VERSION,
       timestamp: new Date().toISOString(),
     };
 
@@ -84,6 +89,7 @@ export const RegistrationModal = ({
       setWhatsapp("");
       setProgram("");
       setLocation("");
+      setConsent(false);
 
       onClose();
       onSuccess(link);
@@ -235,6 +241,15 @@ export const RegistrationModal = ({
             </div>
           </div>
 
+          <div className="mb-6">
+            <ConsentCheckbox
+              id="registration-consent"
+              checked={consent}
+              onChange={setConsent}
+              purpose="process my registration and contact me about it on WhatsApp"
+            />
+          </div>
+
           {error && (
             <p className="text-sm text-red-600 mb-4" role="alert">
               {error}
@@ -244,7 +259,7 @@ export const RegistrationModal = ({
           <Button
             type="submit"
             size="lg"
-            disabled={isSubmitting || !location}
+            disabled={isSubmitting || !location || !consent}
             className="w-full hover:-translate-y-1 hover:shadow-2xl"
           >
             {isSubmitting ? "Submitting..." : "Submit"}

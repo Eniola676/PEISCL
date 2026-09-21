@@ -37,7 +37,25 @@ const JABI_ONLY_COURSE_SLUGS: string[] = [];
  * "not priced yet" and Paystack checkout stays disabled for that course.
  * Fill these in (and set PAYSTACK_ENABLED=true) to switch payments on.
  */
-const COURSE_PRICES_NGN: Record<string, number> = {};
+const COURSE_PRICES_NGN: Record<string, number> = {
+  "microsoft-powerpoint": 35_000,
+  "computer-system-hardware": 40_000,
+  "database-management-system": 35_000,
+  "wordpress-web-design": 85_000,
+  "e-enterprise-e-governance": 85_000,
+  "ai-for-public-sector": 35_000,
+  "digital-marketing-social-media": 40_000,
+  "cybersecurity-awareness": 40_000,
+  "ict-startup-strategy": 70_000,
+  "introduction-to-networking": 60_000,
+  "excel-fundamentals-data-analysis": 45_000,
+  "microsoft-word-training": 35_000,
+  "python-programming": 100_000,
+};
+
+/** "₦35,000", or "Contact us" for courses that aren't priced yet. */
+export const formatPrice = (priceNgn: number) =>
+  priceNgn > 0 ? `₦${priceNgn.toLocaleString("en-NG")}` : "Contact us";
 
 export const tracks = [
   "Data & AI",

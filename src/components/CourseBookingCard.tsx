@@ -1,5 +1,5 @@
 import { ArrowRight, MapPin } from "lucide-react";
-import { Course } from "../data/courses";
+import { Course, formatPrice } from "../data/courses";
 import { formatLocationSummary } from "../data/locations";
 import { getTrackImage } from "../lib/trackImage";
 import { Button } from "./ui/button";
@@ -46,8 +46,8 @@ export const CourseBookingCard = ({ course, onRegister }: CourseBookingCardProps
 
         <div className="flex items-center justify-between gap-4 pt-5 border-t border-white/10">
           <div>
-            <span className="text-xl font-bold text-white">Certificate</span>
-            <span className="text-gray-400"> of completion</span>
+            <div className="text-2xl font-bold text-white">{formatPrice(course.priceNgn)}</div>
+            <div className="text-sm text-gray-400">Includes certificate of completion</div>
           </div>
 
           <Button

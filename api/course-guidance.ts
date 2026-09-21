@@ -7,6 +7,7 @@ import {
   cleanStringList,
   isValidPhone,
   safeTimestamp,
+  consentFields,
 } from "./_lib/validate.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -31,6 +32,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!computerLiteracy) return badRequest(res, "Computer literacy is required");
   if (interests.length === 0) return badRequest(res, "At least one interest is required");
 
+  if (body.consent !== true) return badRequest(res, "Consent is required");
+
   if (!isAirtableConfigured()) {
     return serverError(res, "Storage is not configured");
   }
@@ -48,7 +51,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       Notes: notes,
       Status: "Pending",
       "Submitted At": safeTimestamp(body.timestamp),
-    });
+    }, consentFields(body));
 
     return res.status(200).json({ success: true, id: record.id });
   } catch (error) {

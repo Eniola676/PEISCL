@@ -56,6 +56,19 @@ as shown. All fields can be **Single line text** unless noted.
 | `Email`         | Email               |
 | `Subscribed At` | Date (include time) |
 
+#### Consent columns (NDPA 2023)
+
+Add these two columns to **`Registrations`**, **`Guidance Requests`** and
+**`Newsletter`** so each record carries proof of consent:
+
+| Field                    | Type                |
+| ------------------------ | ------------------- |
+| `Consent Given At`       | Date (include time) |
+| `Privacy Notice Version` | Single line text    |
+
+Until they exist, submissions still save without them (a warning is logged in
+Vercel), so adding them is safe at any time.
+
 #### Table: `Payments` (only needed if you turn Paystack on)
 
 | Field          | Type                |
@@ -91,7 +104,8 @@ local `.env` for development). See `.env.example` for the full annotated list.
 | ------------------ | -------- | -------------------------------- |
 | `AIRTABLE_TOKEN`   | Yes      | Airtable personal access token   |
 | `AIRTABLE_BASE_ID` | Yes      | Airtable base ID (`app...`)      |
-| `ANTHROPIC_API_KEY`| No       | Enables the AI chat widget       |
+| `GROQ_API_KEY`     | No       | Enables the AI chat widget (free) |
+| `ANTHROPIC_API_KEY`| No       | Paid alternative for the chat    |
 | `PAYSTACK_ENABLED` | No       | `true` turns on checkout         |
 | `PAYSTACK_SECRET_KEY` | No    | Paystack secret key              |
 | `PUBLIC_SITE_URL`  | No       | Post-payment callback base URL   |
@@ -132,12 +146,13 @@ don't — but Airtable is the source of truth for follow-up, not WhatsApp.
 
 ## 5. AI chat assistant
 
-Set `ANTHROPIC_API_KEY` to switch it on; without it the widget returns a polite
-"unavailable" message.
+Set `GROQ_API_KEY` (free — <https://console.groq.com/keys>) to switch it on.
+`GEMINI_API_KEY` and `ANTHROPIC_API_KEY` also work; Groq wins if several are
+set. With none, the widget stays hidden. Check it at `/api/health`.
 
 The assistant is grounded in the real course catalogue (generated at runtime
-from `src/data/courses.ts`) and is instructed never to quote prices or invent
-courses, dates, or locations.
+from `src/data/courses.ts`, including fees) and is instructed never to
+estimate prices or invent courses, dates, or locations.
 
 **This costs you money per message** — it's free for visitors, not for PEISCL.
 Cost controls already in place (`api/chat.ts`):
