@@ -1,4 +1,4 @@
-import { LocationId, allLocationIds } from "./locations";
+import { LocationId, allLocationIds } from "./locations.js";
 
 export interface CourseModule {
   title: string;
