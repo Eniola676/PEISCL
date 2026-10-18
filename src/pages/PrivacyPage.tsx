@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { PRIVACY_CONTACT_EMAIL, PRIVACY_NOTICE_VERSION } from "../lib/privacy";
+import { locations } from "../data/locations";
 
 const LAST_UPDATED = new Date(`${PRIVACY_NOTICE_VERSION}T12:00:00`).toLocaleDateString("en-NG", {
   day: "numeric",
@@ -96,7 +97,7 @@ export const PrivacyPage = () => {
                   08097545740
                 </a>
               </>,
-              "Address: Garki, Abuja 900103, Federal Capital Territory, Nigeria",
+              `Address: ${locations.kubwa.address}`,
             ]}
           />
         </Section>

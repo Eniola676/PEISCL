@@ -2,11 +2,16 @@ import { FormEvent, useState } from "react";
 import { Link } from "react-router-dom";
 import { Mail, Phone, MapPin, Send, MessageCircle } from "lucide-react";
 import { Button } from "./ui/button";
+import { locations } from "../data/locations";
 import { PRIVACY_NOTICE_VERSION } from "../lib/privacy";
 
-const ADDRESS = "Garki, Abuja 900103, Federal Capital Territory";
-const MAP_COORDS = "9.0333,7.4833";
-const MAP_BBOX = "7.4633,9.0133,7.5033,9.0533";
+// Kubwa is the main address. Kept in step with the campus list in
+// src/data/locations.ts rather than written out twice.
+const ADDRESS = `${locations.kubwa.address}`;
+// Approximate centre of Kubwa — fine for a "roughly here" pin; the link itself
+// searches the full address.
+const MAP_COORDS = "9.1486,7.3382";
+const MAP_BBOX = "7.3182,9.1286,7.3582,9.1686";
 
 const saveSubscriber = async (email: string) => {
   const response = await fetch("/api/newsletter", {
