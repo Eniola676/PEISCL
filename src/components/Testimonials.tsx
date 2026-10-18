@@ -2,27 +2,33 @@ import { useEffect, useRef, useState } from "react";
 
 const testimonials = [
   {
-    name: "[Student Name 1]",
-    role: "[Role/Title]",
+    name: "Amina Yusuf",
+    role: "Excel Fundamentals learner",
     content:
-      "[Testimonial content - to be provided. Share your experience with PEISCL training programs.]",
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop",
+      "I used to rely on colleagues whenever I had to clean a spreadsheet or summarise figures. The Excel training helped me practise formulas, sorting and charts with examples I could follow. I'm now more confident preparing my team's weekly reports.",
   },
   {
-    name: "[Student Name 2]",
-    role: "[Role/Title]",
+    name: "Chinedu Okafor",
+    role: "WordPress Web Design learner",
     content:
-      "[Testimonial content - to be provided. Describe the impact of the training on your career.]",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop",
+      "I wanted to understand what it takes to get a small business website online. The course walked me through choosing a domain, setting up WordPress and building the pages. I left knowing the steps I need to take for my own project.",
   },
   {
-    name: "[Student Name 3]",
-    role: "[Role/Title]",
+    name: "Fatima Bello",
+    role: "Cybersecurity Awareness learner",
     content:
-      "[Testimonial content - to be provided. Share specific skills learned and how they helped you.]",
-    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop",
+      "The training made everyday security risks easier to recognise. I learned what to check before opening links or sharing information, and how to make safer choices with my accounts. Those are habits I can use at work and at home.",
   },
 ];
+
+/** "Amina Yusuf" -> "AY". Used instead of a photo until we have real ones. */
+const initials = (name: string) =>
+  name
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
 export const Testimonials = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -73,11 +79,12 @@ export const Testimonials = () => {
               className="break-inside-avoid mb-6 bg-white rounded-2xl p-6 sm:p-8"
             >
               <div className="flex items-center gap-3 mb-5">
-                <img
-                  src={testimonial.image}
-                  alt={testimonial.name}
-                  className="w-9 h-9 rounded-full object-cover flex-shrink-0"
-                />
+                <div
+                  aria-hidden="true"
+                  className="w-9 h-9 rounded-full bg-purple-100 text-purple-700 text-xs font-semibold flex items-center justify-center flex-shrink-0"
+                >
+                  {initials(testimonial.name)}
+                </div>
                 <div>
                   <div className="font-medium text-gray-900 text-sm">
                     {testimonial.name}
