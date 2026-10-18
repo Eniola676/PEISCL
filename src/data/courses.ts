@@ -38,19 +38,23 @@ const JABI_ONLY_COURSE_SLUGS: string[] = [];
  * Fill these in (and set PAYSTACK_ENABLED=true) to switch payments on.
  */
 const COURSE_PRICES_NGN: Record<string, number> = {
+  // Set from the October 2026 pricing review: mid-range of each recommended
+  // band. Courses marked "Hold" in that review keep their earlier price.
   "microsoft-powerpoint": 35_000,
-  "computer-system-hardware": 40_000,
-  "database-management-system": 35_000,
+  "computer-system-hardware": 50_000,
+  "database-management-system": 50_000,
   "wordpress-web-design": 85_000,
   "e-enterprise-e-governance": 85_000,
   "ai-for-public-sector": 35_000,
-  "digital-marketing-social-media": 40_000,
+  "digital-marketing-social-media": 55_000,
   "cybersecurity-awareness": 40_000,
   "ict-startup-strategy": 70_000,
   "introduction-to-networking": 60_000,
-  "excel-fundamentals-data-analysis": 45_000,
+  "excel-fundamentals-data-analysis": 55_000,
   "microsoft-word-training": 35_000,
   "python-programming": 100_000,
+  "comprehensive-data-analysis": 95_000,
+  "office-essentials-bundle": 100_000,
 };
 
 /** "₦35,000", or "Contact us" for courses that aren't priced yet. */
@@ -865,6 +869,76 @@ const courseList: RawCourse[] = [
       "Build automation scripts",
       "Work with data and APIs",
       "Develop real-world applications",
+    ],
+  },
+  {
+    id: 14,
+    // DRAFT CONTENT — priced in the October 2026 review but no syllabus was
+    // supplied. The outline below is a placeholder: have the instructor
+    // confirm or replace it before promoting this course.
+    slug: "comprehensive-data-analysis",
+    title: "Comprehensive Data Analysis",
+    track: "Data & AI",
+    duration: "10 Weeks (2 days per week, 2 hours per day)",
+    level: "Beginner to Intermediate",
+    overview:
+      "A full data analysis programme that takes you from raw spreadsheets to findings you can present. You will learn to collect and clean data, analyse it, and build dashboards and reports that answer real business and public sector questions.",
+    objectives: [
+      "Collect, clean and organise data from different sources",
+      "Summarise and explore data to find patterns",
+      "Build dashboards and reports that non-technical colleagues can read",
+      "Present findings and recommendations with confidence",
+    ],
+    prerequisites: [
+      "Basic computer literacy",
+      "Comfortable using a spreadsheet, or completion of our Excel course",
+    ],
+    targetAudience: [
+      "Professionals who work with data but have no formal training",
+      "Public sector and NGO staff who prepare reports",
+      "Graduates moving into analyst roles",
+    ],
+    modules: [
+      { title: "Module 1: Foundations of Data Analysis", topics: ["What data analysis is and where it is used", "Types of data and how they are measured", "The analysis workflow from question to answer"] },
+      { title: "Module 2: Collecting and Cleaning Data", topics: ["Sources of data and how to gather them", "Handling missing, duplicate and inconsistent values", "Structuring data for analysis"] },
+      { title: "Module 3: Exploring and Summarising Data", topics: ["Descriptive statistics", "Grouping, filtering and comparing", "Spotting patterns, trends and outliers"] },
+      { title: "Module 4: Analysis in Excel", topics: ["Formulas and functions for analysis", "Pivot tables and pivot charts", "Scenario and what-if analysis"] },
+      { title: "Module 5: Visualisation and Dashboards", topics: ["Choosing the right chart", "Building an interactive dashboard", "Design principles for clear reporting"] },
+      { title: "Module 6: Capstone Project", topics: ["Analyse a real dataset end to end", "Prepare a report and dashboard", "Present findings to the class"] },
+    ],
+    outcomes: [
+      "Clean and prepare messy data for analysis",
+      "Answer business questions with data",
+      "Build dashboards and reports stakeholders understand",
+      "Present findings clearly to decision makers",
+    ],
+    assessment: ["Weekly practical exercises", "Final capstone project and presentation"],
+  },
+  {
+    id: 15,
+    // Bundle of three existing courses (see the October 2026 pricing review).
+    // Keep the price and contents in step with those courses.
+    slug: "office-essentials-bundle",
+    title: "Office Essentials Bundle: Word, PowerPoint & Excel",
+    track: "Web & Office Skills",
+    duration: "19 Weeks in total — Word (8), Excel (8), PowerPoint (3)",
+    level: "Beginner to Intermediate",
+    overview:
+      "All three of our Microsoft Office courses at one price: Microsoft Word Training, Excel Fundamentals and Data Analysis, and Beginner's PowerPoint. Take them in any order, in one cohort or across several. Cheaper than booking the three separately.",
+    targetAudience: [
+      "Anyone starting office or administrative work",
+      "Professionals who want solid Office skills across the board",
+      "Organisations training staff on day-to-day office tools",
+    ],
+    modules: [
+      { title: "Course 1: Microsoft Word Training (8 weeks)", topics: ["Documents, formatting and styles", "Tables, graphics and long documents", "Collaboration, review and automation"] },
+      { title: "Course 2: Excel Fundamentals and Data Analysis (8 weeks)", topics: ["Worksheets, formulas and functions", "Pivot tables and data cleaning", "Charts, dashboards and visualisation"] },
+      { title: "Course 3: Beginner's PowerPoint (3 weeks)", topics: ["Slides, text, images and charts", "Audio, video, transitions and animation", "Delivering professional presentations"] },
+    ],
+    outcomes: [
+      "Produce professional documents, spreadsheets and presentations",
+      "Analyse and present data in Excel",
+      "Work confidently across the Microsoft Office tools employers expect",
     ],
   },
 ];
